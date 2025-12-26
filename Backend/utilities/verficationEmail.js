@@ -1,41 +1,25 @@
-
-// utilits/verficationEmail.js
+// utilities/verficationEmail.js
 import dotenv from "dotenv";
-dotenv.config();  // ensures env variables are loaded
+dotenv.config();
 
+import sgMail from "@sendgrid/mail";
 
-import nodemailer from "nodemailer";
+// Initialize SendGrid
+const sendgridApiKey = process.env.SENDGRID_API_KEY;
+if (sendgridApiKey) {
+  sgMail.setApiKey(sendgridApiKey);
+  console.log("✅ SendGrid initialized");
+} else {
+  console.error("❌ SENDGRID_API_KEY not set in environment variables");
+}
 
-// 🔹 Debug: check env variables
-console.log("📧 EMAIL_USER:", process.env.EMAIL_USER || "NOT SET");
-console.log("📧 EMAIL_PASS loaded?", process.env.EMAIL_PASS ? "Yes (hidden)" : "NOT SET");
-
-// Remove spaces from app password (Gmail app passwords come with spaces)
-const emailPass = process.env.EMAIL_PASS?.replace(/\s/g, "") || "";
-console.log("📧 EMAIL_PASS cleaned:", emailPass ? "Yes" : "NOT SET");
-
-// configure nodemailer transporter and export it
-export const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: emailPass,
-  },
-});
-
-// Verify transporter connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Email transporter error:", error.message || error);
-  } else {
-    console.log("✅ Email transporter ready");
-  }
-});
+const senderEmail = process.env.SENDER_EMAIL || "noreply@studysync.com";
+console.log("📧 Sender Email:", senderEmail);
 
 // Create and export function to generate verification email
-export const createVerificationMail = (email, name, verificationCode,verifyLink) => ({
-  from: process.env.EMAIL_USER,
+export const createVerificationMail = (email, name, verificationCode, verifyLink) => ({
   to: email,
+  from: senderEmail,
   subject: "Your StudySync Verification Code",
   html: `
     <h2>Hello ${name},</h2>
@@ -43,7 +27,7 @@ export const createVerificationMail = (email, name, verificationCode,verifyLink)
     <h1 style="color: #2E86C1;">${verificationCode}</h1>
     <p>This code will expire in 15 minutes.</p>
     <p>Or click below to verify directly:</p>
-    <a href="${verifyLink}" style="color: #2E86C1;">Verify Account</a>
+    <a href="${verifyLink}" style="color: #2E86C1; text-decoration: none;">Verify Account</a>
   `,
 });
 
@@ -51,13 +35,14 @@ export const createVerificationMail = (email, name, verificationCode,verifyLink)
 export const sendEmail = async (mailOption) => {
   try {
     console.log("📧 Sending email to:", mailOption.to);
-    console.log("📧 From:", mailOption.from);
-    const info = await transporter.sendMail(mailOption);
-    console.log("✅ Email sent successfully:", info.response);
+    const info = await sgMail.send(mailOption);
+    console.log("✅ Email sent successfully");
     return { success: true, info };
   } catch (error) {
     console.error("❌ Error sending email:", error.message || error);
-    console.error("❌ Full error:", JSON.stringify(error, null, 2));
+    if (error.response) {
+      console.error("❌ SendGrid response:", error.response.body);
+    }
     return { success: false, error };
   }
 };
