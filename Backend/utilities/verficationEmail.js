@@ -2,7 +2,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import SibApiV3Sdk from "brevo";
+import SibApiV3Sdk from "sib-api-v3-sdk";
 
 // Initialize Brevo
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
