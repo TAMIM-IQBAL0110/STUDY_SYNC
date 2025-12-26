@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axiosInstance from '../utils/axiosInstance';
-import { API_PATH } from '../utils/apiPaths';
+import axiosInstance from '../utilities/axiosInstance.js';
+import { API_PATH } from '../utilities/apiPaths.js';
 
 const PerformanceChart = () => {
   const [data, setData] = useState([]);

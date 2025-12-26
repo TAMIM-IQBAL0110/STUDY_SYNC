@@ -37,6 +37,11 @@ const SignUpPage = () => {
       setLoading(false)
       return
     }
+    else if (!validateEmail(email)) {
+      setError("Please enter a valid email address.")
+      setLoading(false)
+      return
+    }
     else if (password.length < 8) {
       setError("Password must be at least 8 characters long.")
       setLoading(false)
