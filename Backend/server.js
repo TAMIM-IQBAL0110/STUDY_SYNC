@@ -38,6 +38,26 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Debug endpoint - get verification code (for testing only, remove in production)
+app.get('/api/v1/auth/debug-code/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const Verification = mongoose.model('Verification');
+        const verification = await Verification.findOne({ email });
+        if (!verification) {
+            return res.status(404).json({ message: 'No verification record found' });
+        }
+        res.status(200).json({ 
+            email: verification.email,
+            code: verification.code,
+            token: verification.token.substring(0, 20) + '...',
+            message: 'Debug endpoint - remove in production'
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // connect to MongoDB
 connectDB();
 
