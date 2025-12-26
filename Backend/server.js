@@ -7,6 +7,7 @@ import taskRoutes from './routes/taskRoutes.js'
 import cors from 'cors';
 import path from 'path'
 import { fileURLToPath } from 'url'
+import mongoose from 'mongoose'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -29,7 +30,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'Server is running', timestamp: new Date() });
+    const dbConnected = mongoose.connection.readyState === 1;
+    res.status(200).json({ 
+        status: 'Server is running',
+        database: dbConnected ? 'connected' : 'disconnected',
+        timestamp: new Date() 
+    });
 });
 
 // connect to MongoDB
@@ -38,6 +44,11 @@ connectDB();
 app.use("/api/v1/auth",authRoute);
 app.use("/api/v1/dashboard",dashboardRoute);
 app.use("/api/v1/task",taskRoutes);
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

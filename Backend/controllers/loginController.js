@@ -1,5 +1,6 @@
 import User from '../models/user.js'
 import jwt from 'jsonwebtoken'
+import mongoose from 'mongoose'
 
 // generate JWT token 
 const generateToken = (id)=>{
@@ -11,10 +12,18 @@ const generateToken = (id)=>{
 // login user
 export const loginUser = async(req,res)=>{
     const {email,password} = req.body;
+    
     if(!email || !password){
-        return res.status(400).json({message:'All fields are required'});
+        return res.status(400).json({success: false, message:'Email and password are required'});
     }
+    
     try{
+        // Check if MongoDB is connected
+        if (mongoose.connection.readyState !== 1) {
+            console.error('Database not connected. State:', mongoose.connection.readyState);
+            return res.status(503).json({success: false, message: 'Database connection error. Please try again.'});
+        }
+        
         // check if user exist
         const user = await User.findOne({ email }).select('+password'); 
         if (!user) {
