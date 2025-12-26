@@ -5,6 +5,7 @@ import {getUserInfo, updateUserProfile, uploadProfileImage} from '../controllers
 import { protect } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/uploadMiddleware.js'
 import { transporter, createVerificationMail } from '../utilities/verficationEmail.js'
+import mongoose from 'mongoose'
 
 const router = express.Router();
 
@@ -45,6 +46,26 @@ router.get('/test-email/:email', async (req, res) => {
             code: error.code,
             message: 'Failed to send test email - check backend logs for details'
         });
+    }
+});
+
+// Debug endpoint - get verification code (for testing only, remove in production)
+router.get('/debug-code/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const Verification = mongoose.model('Verification');
+        const verification = await Verification.findOne({ email });
+        if (!verification) {
+            return res.status(404).json({ message: 'No verification record found' });
+        }
+        res.status(200).json({ 
+            email: verification.email,
+            code: verification.code,
+            token: verification.token.substring(0, 20) + '...',
+            message: 'Debug endpoint - remove in production'
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
