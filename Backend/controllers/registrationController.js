@@ -42,15 +42,14 @@ export const registerUser = async (req, res) => {
     //Build verification link
     const verifyLink = `${process.env.CLIENT_URL}/verify?token=${token}&email=${email}`;
 
-    // Send verification email asynchronously (don't wait for it)
-    setImmediate(async () => {
-      try {
-        const mailOption = createVerificationMail(email, name, code, verifyLink);
-        await sendEmail(mailOption);
-      } catch (emailError) {
-        console.error("Background email send failed:", emailError);
-      }
-    });
+    // Send verification email (wait for it to complete so we see errors)
+    try {
+      const mailOption = createVerificationMail(email, name, code, verifyLink);
+      const emailResult = await sendEmail(mailOption);
+      console.log("Email result:", emailResult);
+    } catch (emailError) {
+      console.error("Email send error:", emailError);
+    }
 
     // Respond immediately
     return res.status(200).json({
