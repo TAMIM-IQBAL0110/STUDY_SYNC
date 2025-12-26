@@ -1,4 +1,4 @@
-// utilities/verficationEmail.js
+// utilities/verficationEmail.js - Using Brevo for email delivery
 import dotenv from "dotenv";
 dotenv.config();
 
