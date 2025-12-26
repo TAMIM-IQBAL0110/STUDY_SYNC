@@ -20,6 +20,15 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
+// Verify transporter connection
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter error:", error);
+  } else {
+    console.log("✅ Email transporter ready");
+  }
+});
+
 // Create and export function to generate verification email
 export const createVerificationMail = (email, name, verificationCode,verifyLink) => ({
   from: process.env.EMAIL_USER,
@@ -38,10 +47,12 @@ export const createVerificationMail = (email, name, verificationCode,verifyLink)
 // Send email helper function
 export const sendEmail = async (mailOption) => {
   try {
+    console.log("📧 Sending email to:", mailOption.to);
     const info = await transporter.sendMail(mailOption);
+    console.log("✅ Email sent successfully:", info.response);
     return { success: true, info };
   } catch (error) {
-    console.log("Error sending email:", error);
+    console.error("❌ Error sending email:", error.message || error);
     return { success: false, error };
   }
 };
