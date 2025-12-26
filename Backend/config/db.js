@@ -17,14 +17,19 @@ const connectDB = async ()=>{
             throw new Error("MONGO_URL environment variable is not set");
         }
         
-        await mongoose.connect(process.env.MONGO_URL);
+        console.log("🔄 Attempting MongoDB connection...");
+        await mongoose.connect(process.env.MONGO_URL, {
+            connectTimeoutMS: 10000,
+            socketTimeoutMS: 10000,
+        });
         isConnected = true;
         console.log("✅ MongoDB connected successfully");
     }
     catch(error){
         console.error("❌ MongoDB connection failed:", error.message);
         isConnected = false;
-        // Don't exit process, let the app try to reconnect
+        // Retry connection after 5 seconds
+        console.log("🔄 Retrying MongoDB connection in 5 seconds...");
         setTimeout(connectDB, 5000);
     }
 };

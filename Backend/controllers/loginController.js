@@ -20,8 +20,17 @@ export const loginUser = async(req,res)=>{
     try{
         // Check if MongoDB is connected
         if (mongoose.connection.readyState !== 1) {
-            console.error('Database not connected. State:', mongoose.connection.readyState);
-            return res.status(503).json({success: false, message: 'Database connection error. Please try again.'});
+            console.warn('⚠️ Database connection state:', mongoose.connection.readyState);
+            // Try to reconnect
+            if (mongoose.connection.readyState === 0) {
+                console.log('🔄 Attempting to reconnect...');
+                // Wait a bit for reconnection
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            if (mongoose.connection.readyState !== 1) {
+                return res.status(503).json({success: false, message: 'Database temporarily unavailable. Please try again.'});
+            }
         }
         
         // check if user exist
@@ -46,7 +55,7 @@ export const loginUser = async(req,res)=>{
             token: generateToken(user._id),
         });
     }catch(error){
-        console.error('Login Error:', error.message, error.stack);
+        console.error('❌ Login Error:', error.message);
         return res.status(500).json({
             success: false,
             message: 'Error logging in user',
