@@ -7,7 +7,7 @@ export const API_PATH = {
         VERIFY:"/api/v1/auth/verify",
         GET_USER_INFO: "/api/v1/auth/getUser",
         UPDATE_PROFILE: "/api/v1/auth/updateProfile",
-        UPLOAD_PROFILE_IMAGE: "/api/v1/auth/upload-profile-image",
+        UPLOAD_PROFILE_IMAGE: "/api/v1/auth/uploadProfileImage",
     },
     TASK:{
         ADD:"/api/v1/task/add",

@@ -190,7 +190,10 @@ const Profile = () => {
         }
       })
       toast.success('Profile image uploaded successfully!')
-      setUserData(response.data.user)
+      setUserData({
+        ...userData,
+        profileImageUrl: response.data.profileImageUrl
+      })
       setPreviewImage(null)
       fileInput.value = ''
     } catch (err) {
