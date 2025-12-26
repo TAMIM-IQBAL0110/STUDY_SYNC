@@ -8,6 +8,7 @@ import cors from 'cors';
 import path from 'path'
 import { fileURLToPath } from 'url'
 import mongoose from 'mongoose'
+import { transporter, createVerificationMail } from './utilities/verficationEmail.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -55,6 +56,38 @@ app.get('/api/v1/auth/debug-code/:email', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Test email endpoint (for debugging, remove in production)
+app.get('/api/v1/auth/test-email/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        console.log('🧪 Testing email to:', email);
+        
+        const mailOption = createVerificationMail(
+            email,
+            'Test User',
+            '123456',
+            'https://studysynch.netlify.app/verify?token=test&email=' + email
+        );
+        
+        const info = await transporter.sendMail(mailOption);
+        console.log('✅ Test email sent:', info.response);
+        
+        res.status(200).json({ 
+            success: true,
+            message: 'Test email sent successfully',
+            response: info.response
+        });
+    } catch (error) {
+        console.error('❌ Test email error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message,
+            code: error.code,
+            message: 'Failed to send test email - check backend logs for details'
+        });
     }
 });
 
