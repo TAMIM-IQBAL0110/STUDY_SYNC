@@ -67,36 +67,48 @@ export const registerUser = async (req, res) => {
 export const verifyUser = async (req, res) => {
     try{
         const {token} = req.query;
-        const {code} = req.body;
+        const {code, email} = req.body;
+        
+        console.log("🔍 Verification attempt:", { token: token ? token.substring(0, 10) + '...' : 'none', code, email });
         
         // Check token and code
         if (!token && !code) {
-            return res.status(400).json({ message: "Token or code is required" });
+            return res.status(400).json({ success: false, message: "Token or code is required" });
         }
 
         // Find verification record
         let verification;
         if (token) {
+            console.log("✓ Looking up by token");
             verification = await Verification.findOne({ token });
         } 
         else if (code) {
+            console.log("✓ Looking up by code:", code);
             verification = await Verification.findOne({ code });
         }
 
         if(!verification){
-            return res.status(400).json({message:"Invalid or expired token"});
+            console.warn("❌ No verification record found");
+            return res.status(400).json({success: false, message:"Invalid or expired verification code"});
         }
+        
+        console.log("✓ Verification record found for:", verification.email);
+        
         // If using code, double-check it matches
         if (code && verification.code !== code) {
-            return res.status(400).json({ message: "Incorrect verification code" });
+            console.warn("❌ Code mismatch. Expected:", verification.code, "Got:", code);
+            return res.status(400).json({ success: false, message: "Incorrect verification code" });
         }
 
         // Find temporary user
         const tempUser = await TempUser.findOne({email:verification.email});
         if (!tempUser) {
-            return res.status(400).json({ message: "Temporary user not found or expired" });
+            console.warn("❌ Temporary user not found for:", verification.email);
+            return res.status(400).json({ success: false, message: "User registration expired. Please register again." });
         }
 
+        console.log("✓ Creating verified user:", tempUser.email);
+        
         // Now create user and store it in main collection
         await User.create({
             name:tempUser.name,
@@ -109,8 +121,13 @@ export const verifyUser = async (req, res) => {
         await TempUser.deleteOne({email:tempUser.email});
         await Verification.deleteOne({_id:verification._id});
        
-        res.status(200).json({message: "Email verified successfully!" });
+        console.log("✅ User verified successfully:", tempUser.email);
+        res.status(200).json({success: true, message: "Email verified successfully! You can now login." });
     } catch(error){
+        console.error("❌ Verification error:", error.message);
+        return res.status(500).json({success: false, message: "Verification failed", error: error.message});
+    }
+}
         console.error("Error in verifyUser:", error);
         res.status(500).json({ message: "Server error" });
     }
