@@ -57,7 +57,13 @@ const SignUpPage = () => {
 
       if (response.status === 200) {
         toast.success(response.data.message)
-        navigate(`/verification?email=${encodeURIComponent(email)}`)
+        // Extract email and token from the verification link returned by backend
+        const verifyLink = response.data.verifyLink
+        const url = new URL(verifyLink)
+        const emailParam = url.searchParams.get('email')
+        const tokenParam = url.searchParams.get('token')
+        // Navigate with both email and token as query params
+        navigate(`/verification?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(tokenParam)}`)
       } else {
         toast.error(response.data.message)
       }
