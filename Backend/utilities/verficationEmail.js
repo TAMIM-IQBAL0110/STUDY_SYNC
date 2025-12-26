@@ -6,9 +6,9 @@ dotenv.config();  // ensures env variables are loaded
 
 import nodemailer from "nodemailer";
 
-// // 🔹 Debug: check env variables
-// console.log("EMAIL_USER:", process.env.EMAIL_USER);
-// console.log("EMAIL_PASS loaded?", process.env.EMAIL_PASS ? "Yes" : "No");
+// 🔹 Debug: check env variables
+console.log("📧 EMAIL_USER:", process.env.EMAIL_USER || "NOT SET");
+console.log("📧 EMAIL_PASS loaded?", process.env.EMAIL_PASS ? "Yes (hidden)" : "NOT SET");
 
 
 // configure nodemailer transporter and export it
@@ -23,7 +23,7 @@ export const transporter = nodemailer.createTransport({
 // Verify transporter connection
 transporter.verify((error, success) => {
   if (error) {
-    console.error("❌ Email transporter error:", error);
+    console.error("❌ Email transporter error:", error.message || error);
   } else {
     console.log("✅ Email transporter ready");
   }
