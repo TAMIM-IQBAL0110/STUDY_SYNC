@@ -10,13 +10,16 @@ import nodemailer from "nodemailer";
 console.log("📧 EMAIL_USER:", process.env.EMAIL_USER || "NOT SET");
 console.log("📧 EMAIL_PASS loaded?", process.env.EMAIL_PASS ? "Yes (hidden)" : "NOT SET");
 
+// Remove spaces from app password (Gmail app passwords come with spaces)
+const emailPass = process.env.EMAIL_PASS?.replace(/\s/g, "") || "";
+console.log("📧 EMAIL_PASS cleaned:", emailPass ? "Yes" : "NOT SET");
 
 // configure nodemailer transporter and export it
 export const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: emailPass,
   },
 });
 
@@ -48,11 +51,13 @@ export const createVerificationMail = (email, name, verificationCode,verifyLink)
 export const sendEmail = async (mailOption) => {
   try {
     console.log("📧 Sending email to:", mailOption.to);
+    console.log("📧 From:", mailOption.from);
     const info = await transporter.sendMail(mailOption);
     console.log("✅ Email sent successfully:", info.response);
     return { success: true, info };
   } catch (error) {
     console.error("❌ Error sending email:", error.message || error);
+    console.error("❌ Full error:", JSON.stringify(error, null, 2));
     return { success: false, error };
   }
 };
