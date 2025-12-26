@@ -9,6 +9,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import mongoose from 'mongoose'
 
+// Force rebuild: Clear Render cache - using Brevo email service only
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
