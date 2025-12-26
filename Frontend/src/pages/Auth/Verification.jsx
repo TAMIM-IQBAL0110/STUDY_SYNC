@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiMail, FiKey } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../utilities/axiosInstance.js';
@@ -8,11 +8,24 @@ import { API_PATH } from '../../utilities/apiPath.js';
 const VerificationPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [email] = useState(location.state?.email || '');
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Get email and token from URL params or location state
+  useEffect(() => {
+    const urlEmail = searchParams.get('email');
+    const urlToken = searchParams.get('token');
+    const stateEmail = location.state?.email;
+    const finalEmail = urlEmail || stateEmail || '';
+    const finalToken = urlToken || '';
+    setEmail(finalEmail);
+    setToken(finalToken);
+  }, [searchParams, location.state]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -25,8 +38,15 @@ const VerificationPage = () => {
       return;
     }
 
+    if (!email) {
+      setError('Email is missing. Please start the registration process again.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await axiosInstance.post(API_PATH.AUTH.VERIFY, { code });
+      const url = token ? `${API_PATH.AUTH.VERIFY}?token=${token}` : API_PATH.AUTH.VERIFY;
+      const response = await axiosInstance.post(url, { code, email });
 
       if (response.data.success) {
         toast.success(response.data.message);

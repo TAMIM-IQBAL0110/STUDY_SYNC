@@ -57,7 +57,7 @@ const SignUpPage = () => {
 
       if (response.status === 200) {
         toast.success(response.data.message)
-        navigate('/verification', { state: { email } }) // pass email to prefill if needed
+        navigate(`/verification?email=${encodeURIComponent(email)}`)
       } else {
         toast.error(response.data.message)
       }
