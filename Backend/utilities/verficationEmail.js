@@ -6,8 +6,12 @@ import SibApiV3Sdk from "sib-api-v3-sdk";
 
 // Initialize Brevo
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-SibApiV3Sdk.ApiClient.instance.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
-console.log("📧 BREVO_API_KEY loaded?", process.env.BREVO_API_KEY ? "Yes" : "NOT SET");
+const apiKey = process.env.BREVO_API_KEY;
+console.log("📧 BREVO_API_KEY loaded?", apiKey ? "Yes (length: " + apiKey.length + ")" : "NOT SET");
+if (!apiKey) {
+  console.error("❌ CRITICAL: BREVO_API_KEY is not set! Email sending will fail!");
+}
+SibApiV3Sdk.ApiClient.instance.authentications["api-key"].apiKey = apiKey;
 
 // Use the verified sender email from Brevo account
 const senderEmail = process.env.BREVO_SENDER_EMAIL || "tamimiqbalacademic@gmail.com";
@@ -35,6 +39,7 @@ export const sendEmail = async (mailOption) => {
     console.log("📧 Sending email to:", mailOption.to[0].email);
     console.log("📧 From:", mailOption.sender.email);
     console.log("📧 Subject:", mailOption.subject);
+    console.log("📧 Brevo API Key set:", process.env.BREVO_API_KEY ? "Yes" : "NO");
     
     const response = await apiInstance.sendTransacEmail(mailOption);
     
@@ -42,6 +47,8 @@ export const sendEmail = async (mailOption) => {
     return { success: true, info: response };
   } catch (error) {
     console.error("❌ Error sending email:", error.message || error);
+    console.error("❌ Status code:", error.response?.statusCode);
+    console.error("❌ Error body:", error.response?.body);
     console.error("❌ Full error:", JSON.stringify(error, null, 2));
     return { success: false, error };
   }
