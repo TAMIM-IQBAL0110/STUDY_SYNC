@@ -63,7 +63,7 @@ const SignUpPage = () => {
         const emailParam = url.searchParams.get('email')
         const tokenParam = url.searchParams.get('token')
         // Navigate with both email and token as query params
-        navigate(`/verification?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(tokenParam)}`)
+        navigate(`/verify?email=${encodeURIComponent(emailParam)}&token=${encodeURIComponent(tokenParam)}`)
       } else {
         toast.error(response.data.message)
       }
