@@ -9,7 +9,8 @@ const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 SibApiV3Sdk.ApiClient.instance.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
 console.log("📧 BREVO_API_KEY loaded?", process.env.BREVO_API_KEY ? "Yes" : "NOT SET");
 
-const senderEmail = "tamimiqbalacademic@gmail.com";
+// Use the verified sender email from Brevo account
+const senderEmail = process.env.BREVO_SENDER_EMAIL || "tamimiqbalacademic@gmail.com";
 const senderName = "StudySync";
 console.log("📧 Sender Email:", senderEmail);
 
