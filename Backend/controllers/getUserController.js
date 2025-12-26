@@ -77,6 +77,9 @@ export const uploadProfileImage = async(req, res) => {
         }
 
         const userId = req.user._id
+        console.log("📸 Uploading image for user:", userId)
+        console.log("📸 File info:", { filename: req.file.filename, mimetype: req.file.mimetype, size: req.file.size })
+
         const user = await User.findById(userId)
 
         if (!user) {
@@ -87,11 +90,15 @@ export const uploadProfileImage = async(req, res) => {
         user.profileImageUrl = imageUrl
         await user.save()
 
+        console.log("✅ Image uploaded successfully:", imageUrl)
         res.status(200).json({ 
             message: 'Profile image uploaded successfully', 
-            profileImageUrl: imageUrl 
+            profileImageUrl: imageUrl,
+            user: user
         })
     } catch (error) {
+        console.error("❌ Error uploading image:", error.message)
+        console.error("❌ Full error:", error)
         res.status(500).json({ message: 'Error uploading image', error: error.message })
     }
 }
