@@ -6,10 +6,10 @@ import SibApiV3Sdk from "sib-api-v3-sdk";
 
 // Initialize Brevo
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-const apiKey = process.env.BREVO_API_KEY;
-console.log("📧 BREVO_API_KEY loaded?", apiKey ? "Yes (length: " + apiKey.length + ")" : "NOT SET");
+const apiKey = process.env.BREVO_KEY;
+console.log("📧 BREVO_KEY loaded?", apiKey ? "Yes (length: " + apiKey.length + ")" : "NOT SET");
 if (!apiKey) {
-  console.error("❌ CRITICAL: BREVO_API_KEY is not set! Email sending will fail!");
+  console.error("❌ CRITICAL: BREVO_KEY is not set! Email sending will fail!");
 }
 SibApiV3Sdk.ApiClient.instance.authentications["api-key"].apiKey = apiKey;
 
@@ -39,7 +39,7 @@ export const sendEmail = async (mailOption) => {
     console.log("📧 Sending email to:", mailOption.to[0].email);
     console.log("📧 From:", mailOption.sender.email);
     console.log("📧 Subject:", mailOption.subject);
-    const keyLoaded = process.env.BREVO_API_KEY;
+    const keyLoaded = process.env.BREVO_KEY;
     console.log("📧 Brevo API Key set:", keyLoaded ? "Yes (length: " + keyLoaded.length + ")" : "NO");
     console.log("📧 API Key first 20 chars:", keyLoaded ? keyLoaded.substring(0, 20) : "NOT SET");
     console.log("📧 API Key last 10 chars:", keyLoaded ? keyLoaded.substring(keyLoaded.length - 10) : "NOT SET");
