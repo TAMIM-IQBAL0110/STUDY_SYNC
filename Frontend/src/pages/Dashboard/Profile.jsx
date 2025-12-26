@@ -12,6 +12,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [isChangingEmail, setIsChangingEmail] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [imageLoadError, setImageLoadError] = useState(false)
   const [editData, setEditData] = useState({
     name: '',
     userBio: ''
@@ -30,6 +31,12 @@ const Profile = () => {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
+  // Helper function to get initials from name
+  const getInitials = (name) => {
+    if (!name) return '?'
+    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2)
+  }
+
   useEffect(() => {
     fetchUserData()
   }, [])
@@ -39,6 +46,7 @@ const Profile = () => {
       const response = await axiosInstance.get(API_PATH.AUTH.GET_USER_INFO)
       console.log('User data fetched:', response.data)
       setUserData(response.data)
+      setImageLoadError(false) // Reset image load error when fetching new data
       // Handle both 'bio' and 'userBio' field names
       const bioValue = response.data.bio || response.data.userBio || ''
       setEditData({
@@ -269,10 +277,11 @@ const Profile = () => {
                         display: 'block'
                       }}
                     />
-                  ) : userData?.profileImageUrl ? (
+                  ) : userData?.profileImageUrl && !imageLoadError ? (
                     <img 
                       src={`${baseUrl}${userData.profileImageUrl}`}
                       alt="Profile"
+                      onError={() => setImageLoadError(true)}
                       style={{ 
                         width: '96px', 
                         height: '96px', 
@@ -284,6 +293,23 @@ const Profile = () => {
                         display: 'block'
                       }}
                     />
+                  ) : (
+                    <div 
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        borderRadius: '50%', 
+                        backgroundColor: 'oklch(0.4 0.1 245)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '36px',
+                        fontWeight: 'bold',
+                        color: 'white'
+                      }}
+                    >
+                      {getInitials(userData?.name)}
+                    </div>
                   ) : (
                     <div 
                       style={{ 
