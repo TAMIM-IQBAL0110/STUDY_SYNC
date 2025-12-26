@@ -8,7 +8,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 console.log("📧 RESEND_API_KEY loaded?", process.env.RESEND_API_KEY ? "Yes" : "NOT SET");
 
-const senderEmail = process.env.SENDER_EMAIL || "onboarding@resend.dev";
+const senderEmail = "tamimiqbalacademic@gmail.com";
 console.log("📧 Sender Email:", senderEmail);
 
 // Create and export function to generate verification email
