@@ -1,4 +1,5 @@
 import crypto from "crypto"
+import jwt from "jsonwebtoken"
 import User from "../models/user.js";
 import Verification from "../models/verification.js";
 import { createVerificationMail,sendEmail} from "../utilities/verficationEmail.js";
@@ -62,7 +63,6 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 //verify register user
 export const verifyUser = async (req, res) => {
     try{
@@ -110,7 +110,7 @@ export const verifyUser = async (req, res) => {
         console.log("✓ Creating verified user:", tempUser.email);
         
         // Now create user and store it in main collection
-        await User.create({
+        const newUser = await User.create({
             name:tempUser.name,
             email:tempUser.email,
             password: tempUser.password,
@@ -122,13 +122,26 @@ export const verifyUser = async (req, res) => {
         await Verification.deleteOne({_id:verification._id});
        
         console.log("✅ User verified successfully:", tempUser.email);
-        res.status(200).json({success: true, message: "Email verified successfully! You can now login." });
+        
+        // Generate JWT token
+        const jwtToken = jwt.sign(
+            { id: newUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        
+        res.status(200).json({
+            success: true, 
+            message: "Email verified successfully! You can now login.",
+            user: {
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email
+            },
+            token: jwtToken
+        });
     } catch(error){
         console.error("❌ Verification error:", error.message);
         return res.status(500).json({success: false, message: "Verification failed", error: error.message});
-    }
-}
-        console.error("Error in verifyUser:", error);
-        res.status(500).json({ message: "Server error" });
     }
 };
