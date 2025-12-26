@@ -9,12 +9,8 @@ const PerformanceGraph = ({ Performance, nDays, className }) => {
 
   // Validate data structure
   if (filteredData.some(d => typeof d.completed === 'undefined' || typeof d.pending === 'undefined')) {
-    console.warn('Invalid performance data structure:', filteredData);
     return null;
   }
-
-  // Debug logging
-  console.log('Performance data dates:', filteredData.map(d => d.date));
 
   return (
     <div className={`w-full h-full overflow-x-auto overflow-y-hidden relative ${className}`}>

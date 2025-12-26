@@ -31,18 +31,20 @@ Thumbs.db
 # React Frontend
 # ==========================
 # Node modules
-frontend/node_modules/
+Frontend/node_modules/
 # Build output
-frontend/build/
+Frontend/build/
 # Environment variables
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.development.local
+Frontend/.env.test.local
+Frontend/.env.production.local
 # Misc
-frontend/.DS_Store
+Frontend/.DS_Store
 
+
+Backend/.env
 # ==========================
 # IDE / Editor
 # ==========================
