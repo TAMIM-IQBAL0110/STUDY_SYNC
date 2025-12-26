@@ -2,35 +2,19 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// 🔹 Debug: check env variables
-console.log("📧 EMAIL_USER:", process.env.EMAIL_USER || "NOT SET");
-console.log("📧 EMAIL_PASS loaded?", process.env.EMAIL_PASS ? "Yes (hidden)" : "NOT SET");
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+console.log("📧 RESEND_API_KEY loaded?", process.env.RESEND_API_KEY ? "Yes" : "NOT SET");
 
-// configure nodemailer transporter and export it
-export const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Verify transporter connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Email transporter error:", error.message || error);
-    console.error("❌ Full error object:", JSON.stringify(error, null, 2));
-  } else {
-    console.log("✅ Email transporter ready");
-  }
-});
+const senderEmail = process.env.SENDER_EMAIL || "onboarding@resend.dev";
+console.log("📧 Sender Email:", senderEmail);
 
 // Create and export function to generate verification email
 export const createVerificationMail = (email, name, verificationCode, verifyLink) => ({
-  from: process.env.EMAIL_USER,
   to: email,
+  from: senderEmail,
   subject: "Your StudySync Verification Code",
   html: `
     <h2>Hello ${name},</h2>
@@ -38,24 +22,29 @@ export const createVerificationMail = (email, name, verificationCode, verifyLink
     <h1 style="color: #2E86C1;">${verificationCode}</h1>
     <p>This code will expire in 15 minutes.</p>
     <p>Or click below to verify directly:</p>
-    <a href="${verifyLink}" style="color: #2E86C1;">Verify Account</a>
+    <a href="${verifyLink}" style="color: #2E86C1; text-decoration: none;">Verify Account</a>
   `,
 });
 
-// Send email helper function
+// Send email helper function using Resend
 export const sendEmail = async (mailOption) => {
   try {
     console.log("📧 Sending email to:", mailOption.to);
     console.log("📧 From:", mailOption.from);
     console.log("📧 Subject:", mailOption.subject);
-    const info = await transporter.sendMail(mailOption);
-    console.log("✅ Email sent successfully:", info.response);
-    return { success: true, info };
+    
+    const response = await resend.emails.send(mailOption);
+    
+    if (response.error) {
+      console.error("❌ Error sending email:", response.error.message);
+      return { success: false, error: response.error };
+    }
+    
+    console.log("✅ Email sent successfully:", response.data.id);
+    return { success: true, info: response.data };
   } catch (error) {
     console.error("❌ Error sending email:", error.message || error);
     console.error("❌ Full error:", JSON.stringify(error, null, 2));
-    console.error("❌ Error code:", error.code);
-    console.error("❌ Error response:", error.response);
     return { success: false, error };
   }
 };
