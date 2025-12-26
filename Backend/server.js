@@ -27,12 +27,26 @@ app.use(
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'Server is running', timestamp: new Date() });
+});
+
 // connect to MongoDB
 connectDB();
 
 app.use("/api/v1/auth",authRoute);
 app.use("/api/v1/dashboard",dashboardRoute);
 app.use("/api/v1/task",taskRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ 
+        message: 'Internal Server Error',
+        error: process.env.NODE_ENV === 'production' ? 'Server error' : err.message
+    });
+});
 
 // Use environment variable PORT if available, otherwise default to 5000
 const PORT = process.env.PORT || 5000;

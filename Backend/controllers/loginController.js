@@ -12,18 +12,18 @@ const generateToken = (id)=>{
 export const loginUser = async(req,res)=>{
     const {email,password} = req.body;
     if(!email || !password){
-        res.status(400).json({message:'All field are required'});
+        return res.status(400).json({message:'All fields are required'});
     }
     try{
         // check if user exist
         const user = await User.findOne({ email }).select('+password'); 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(400).json({ success: false, message: 'Invalid email or password' });
         }
         // Compare passwords
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(400).json({ success: false, message: 'Invalid email or password' });
         }
         // Success
         return res.status(200).json({
@@ -37,8 +37,9 @@ export const loginUser = async(req,res)=>{
             token: generateToken(user._id),
         });
     }catch(error){
-        console.error('Login Error:', error);
+        console.error('Login Error:', error.message, error.stack);
         return res.status(500).json({
+            success: false,
             message: 'Error logging in user',
             error: error.message,
         });
