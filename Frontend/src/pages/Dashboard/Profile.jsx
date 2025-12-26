@@ -310,23 +310,6 @@ const Profile = () => {
                     >
                       {getInitials(userData?.name)}
                     </div>
-                  ) : (
-                    <div 
-                      style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        borderRadius: '50%', 
-                        backgroundColor: 'oklch(0.4 0.1 245)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '36px',
-                        fontWeight: 'bold',
-                        color: 'white'
-                      }}
-                    >
-                      {userData?.name?.charAt(0).toUpperCase()}
-                    </div>
                   )}
                 </div>
                 <div className="flex-1">
