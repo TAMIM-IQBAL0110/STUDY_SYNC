@@ -21,6 +21,7 @@ export const transporter = nodemailer.createTransport({
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Email transporter error:", error.message || error);
+    console.error("❌ Full error object:", JSON.stringify(error, null, 2));
   } else {
     console.log("✅ Email transporter ready");
   }
@@ -45,11 +46,16 @@ export const createVerificationMail = (email, name, verificationCode, verifyLink
 export const sendEmail = async (mailOption) => {
   try {
     console.log("📧 Sending email to:", mailOption.to);
+    console.log("📧 From:", mailOption.from);
+    console.log("📧 Subject:", mailOption.subject);
     const info = await transporter.sendMail(mailOption);
     console.log("✅ Email sent successfully:", info.response);
     return { success: true, info };
   } catch (error) {
     console.error("❌ Error sending email:", error.message || error);
+    console.error("❌ Full error:", JSON.stringify(error, null, 2));
+    console.error("❌ Error code:", error.code);
+    console.error("❌ Error response:", error.response);
     return { success: false, error };
   }
 };
