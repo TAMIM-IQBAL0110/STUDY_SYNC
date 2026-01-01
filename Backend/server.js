@@ -17,12 +17,20 @@ const app = express();
 // Middleware that parses incoming JSON requests
 app.use(express.json());
 
+const allowedOrigins = (process.env.CLIENT_URL || "*").split(',').map(url => url.trim());
 //Middleware to handle CORS
 app.use(
     cors({
-        origin:process.env.CLIENT_URL || "*",
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+                callback(null, true);  // Send only the requesting origin ✅
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods:["GET","POST","DELETE","PUT"],
-        allowedHeaders:["Content-Type","Authorization"]
+        allowedHeaders:["Content-Type","Authorization"],
+        credentials: true
     })
 );
 
