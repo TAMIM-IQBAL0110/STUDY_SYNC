@@ -8,7 +8,6 @@ const taskForm = document.getElementById('taskForm');
 const taskNameInput = document.getElementById('taskName');
 const descriptionInput = document.getElementById('description');
 const dueDateInput = document.getElementById('dueDate');
-const prioritySelect = document.getElementById('priority');
 const categoryInput = document.getElementById('category');
 const captureUrlCheckbox = document.getElementById('captureUrl');
 const resetBtn = document.getElementById('resetBtn');
@@ -21,7 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
   loadRecentTasks();
   setDefaultDate();
   loadAuthToken();
+  loadContextMenuData();
 });
+
+// Load data from context menu
+function loadContextMenuData() {
+  chrome.storage.local.get(['selectedText', 'pageUrl'], (result) => {
+    if (result.selectedText) {
+      taskNameInput.value = result.selectedText;
+      chrome.storage.local.remove(['selectedText', 'pageUrl']);
+    }
+  });
+}
 
 // Set default due date to tomorrow
 function setDefaultDate() {
@@ -69,15 +79,17 @@ taskForm.addEventListener('submit', async (e) => {
       pageUrl = tab[0].url;
     }
 
-    // Prepare task data
+    // Prepare task data matching backend schema
+    // Convert due date to start time (default to 9:00 AM if no time set)
+    const startTimeMinutes = 9 * 60; // 9:00 AM in minutes from midnight
+    
     const taskData = {
-      taskName: taskNameInput.value.trim(),
+      name: taskNameInput.value.trim(),
       description: descriptionInput.value.trim() || '',
       date: dueDateInput.value || new Date().toISOString().split('T')[0],
-      priority: prioritySelect.value,
-      category: categoryInput.value.trim() || 'General',
-      status: 'Pending',
-      reference: pageUrl || ''
+      startTime: startTimeMinutes,
+      category: categoryInput.value.trim() || 'Others',
+      reminder: false
     };
 
     try {
@@ -88,7 +100,7 @@ taskForm.addEventListener('submit', async (e) => {
       submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Creating...';
 
       // Send to backend
-      const response = await fetch(`${API_URL}/api/tasks/add`, {
+      const response = await fetch(`${API_URL}/api/v1/task/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -186,10 +198,10 @@ function loadRecentTasks() {
     recentTasksList.innerHTML = recentTasks.map(task => `
       <div class="recent-task-item">
         <div class="task-info">
-          <p class="task-name">${escapeHtml(task.taskName)}</p>
+          <p class="task-name">${escapeHtml(task.name || 'Untitled')}</p>
           <p class="task-meta">
-            <span class="priority priority-${task.priority.toLowerCase()}">${task.priority}</span>
-            <span class="category">${escapeHtml(task.category)}</span>
+            <span class="category">${escapeHtml(task.category || 'Others')}</span>
+            <span class="date">${task.date || 'No date'}</span>
           </p>
         </div>
       </div>

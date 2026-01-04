@@ -1,53 +1,20 @@
-// Context menu for quick task creation from selected text
+// Context menu setup
 chrome.runtime.onInstalled.addListener(() => {
-  // Create context menu item
   chrome.contextMenus.create({
     id: 'create-task',
     title: 'Create STUDY_SYNC Task',
-    contexts: ['selection'],
-    icons: {
-      16: 'images/icon-16.png'
-    }
+    contexts: ['selection']
   });
 });
 
-// Handle context menu clicks
+// Handle context menu selection
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'create-task' && info.selectionText) {
-    // Open popup and send selected text
+    chrome.storage.local.set({
+      selectedText: info.selectionText,
+      pageUrl: tab.url,
+      pageTitle: tab.title
+    });
     chrome.action.openPopup();
-    
-    // Send message to popup
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: 'createFromSelection',
-        selectedText: info.selectionText,
-        pageUrl: tab.url,
-        pageTitle: tab.title
-      });
-    });
-  }
-});
-
-// Handle badge updates
-chrome.alarms.create('checkTasks', { periodInMinutes: 5 });
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'checkTasks') {
-    // Check for pending tasks and update badge
-    chrome.storage.sync.get(['taskCount'], (result) => {
-      const count = result.taskCount || 0;
-      if (count > 0) {
-        chrome.action.setBadgeText({ text: count.toString() });
-        chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
-      }
-    });
-  }
-});
-
-// Keep service worker alive
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'keepAlive') {
-    sendResponse({ alive: true });
   }
 });
