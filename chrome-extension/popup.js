@@ -51,7 +51,7 @@ function loadAuthToken() {
 
 // Open STUDY_SYNC app
 openAppBtn.addEventListener('click', () => {
-  chrome.tabs.create({ url: 'https://study-sync-mv99.onrender.com' }); // Production app
+  chrome.tabs.create({ url: 'https://studysynch.netlify.app' }); // Frontend app
 });
 
 // Handle form submission
