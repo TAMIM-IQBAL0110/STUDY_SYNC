@@ -14,18 +14,15 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'create-task' && info.selectionText) {
-    // Open popup and send selected text
-    chrome.action.openPopup();
-    
-    // Send message to popup
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: 'createFromSelection',
-        selectedText: info.selectionText,
-        pageUrl: tab.url,
-        pageTitle: tab.title
-      });
+    // Store selected text in storage to pass to popup
+    chrome.storage.local.set({
+      selectedText: info.selectionText,
+      pageUrl: tab.url,
+      pageTitle: tab.title
     });
+    
+    // Open popup
+    chrome.action.openPopup();
   }
 });
 
