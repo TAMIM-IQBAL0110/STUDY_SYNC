@@ -167,7 +167,7 @@ const Home = () => {
               30-Day Performance Trend
             </h3>
           </div>
-          <div className="h-87.5 w-full">
+          <div className="h-96 w-full">
             {dashboardStats?.last30DaysPerformance && dashboardStats.last30DaysPerformance.length > 0 ? (
               <PerformanceGraph 
                 Performance={dashboardStats.last30DaysPerformance}

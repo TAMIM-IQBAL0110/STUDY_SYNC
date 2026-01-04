@@ -74,17 +74,19 @@ const Analysis = () => {
   return (
     <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'oklch(0.96 0.03 245)' }}>
       {/* Header Section */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+      <div className="max-w-7xl mx-auto flex flex-col gap-4 mb-8 md:mb-10">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3" style={{ color: 'oklch(0.15 0.06 245)' }}>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3" style={{ color: 'oklch(0.15 0.06 245)' }}>
             <span className="p-2 rounded-lg text-white shadow-lg" style={{ backgroundColor: 'oklch(0.4 0.1 245)' }}>
                 <FiActivity size={24} />
             </span>
-            Analytics Overview
+            <span>Analytics</span>
           </h1>
-          <p className="mt-1 ml-12 font-medium" style={{ color: 'oklch(0.4 0.06 245)' }}>Tracking your productivity trends</p>
+          <p className="mt-1 ml-12 font-medium text-sm" style={{ color: 'oklch(0.4 0.06 245)' }}>Tracking your productivity trends</p>
         </div>
-        <TimeFilter />
+        <div className="flex justify-start">
+          <TimeFilter />
+        </div>
       </div>
 
       {loading ? (
@@ -93,10 +95,10 @@ const Analysis = () => {
           <p className="font-semibold animate-pulse text-lg" style={{ color: 'oklch(0.4 0.06 245)' }}>Generating Insights...</p>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
           
           {/* Top Row: Pie Charts (Categories) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             <div className="group transition-transform duration-300 hover:-translate-y-1">
                 <CategoryPieChart 
                   title="Completed Tasks by Category" 
@@ -115,29 +117,29 @@ const Analysis = () => {
 
           {/* Middle Row: Performance Graph (Full Width Card) */}
           <div className="rounded-2xl shadow-lg" style={{ backgroundColor: 'oklch(1 0.03 245)' }}>
-            <div className="p-6">
-              <div className="flex items-center justify-between gap-2 mb-6">
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg text-white" style={{ backgroundColor: 'oklch(0.4 0.1 245)' }}>
                     <FiTrendingUp size={20} />
                   </div>
-                  <h3 className="text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>
-                    {nDays === 7 ? '7-Day' : nDays === 30 ? '30-Day' : '90-Day'} Performance Trend
+                  <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>
+                    {nDays === 7 ? '7-Day' : nDays === 30 ? '30-Day' : '90-Day'} Performance
                   </h3>
                 </div>
                 {/* Legend */}
-                <div className="flex gap-6 text-sm p-3 rounded-lg" style={{ backgroundColor: 'white' }}>
+                <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm p-2 sm:p-3 rounded-lg flex-wrap" style={{ backgroundColor: 'white' }}>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 160)' }}></div>
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 160)' }}></div>
                     <span style={{ color: 'oklch(0.4 0.06 245)' }}>Completed</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 100)' }}></div>
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 100)' }}></div>
                     <span style={{ color: 'oklch(0.4 0.06 245)' }}>Pending</span>
                   </div>
                 </div>
               </div>
-              <div className="h-87.5 w-full">
+              <div className="h-80 sm:h-96 md:h-[28rem] w-full">
                 {data?.last30DaysPerformance && data.last30DaysPerformance.length > 0 ? (
                   <PerformanceGraph 
                     Performance={data?.last30DaysPerformance || []} 
@@ -155,25 +157,25 @@ const Analysis = () => {
 
           {/* Bottom Row: Bar Chart */}
           <div className="rounded-2xl shadow-lg overflow-hidden" style={{ backgroundColor: 'oklch(1 0.03 245)' }}>
-             <div className="p-6">
-               <div className="flex items-center justify-between gap-2 mb-6">
+             <div className="p-4 sm:p-6">
+               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg text-white" style={{ backgroundColor: 'oklch(0.5 0.06 160)' }}><FiCheckCircle size={20} /></div>
-                      <h3 className="text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>Daily Completion Volume</h3>
+                      <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>Daily Volume</h3>
                   </div>
                   {/* Legend - Parallel to title */}
-                  <div className="flex gap-6 text-sm p-3 rounded-lg" style={{ backgroundColor: 'white' }}>
+                  <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm p-2 sm:p-3 rounded-lg flex-wrap" style={{ backgroundColor: 'white' }}>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 160)' }}></div>
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 160)' }}></div>
                       <span style={{ color: 'oklch(0.4 0.06 245)' }}>Completed</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: '#f97316' }}></div>
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: '#f97316' }}></div>
                       <span style={{ color: 'oklch(0.4 0.06 245)' }}>Pending</span>
                     </div>
                   </div>
                </div>
-               <div className="h-96 w-full">
+               <div className="h-64 sm:h-80 md:h-96 w-full">
                   {data?.last30DaysPerformance && data.last30DaysPerformance.length > 0 ? (
                     <DailyBarChart 
                       data={data.last30DaysPerformance.slice(-nDays)} 

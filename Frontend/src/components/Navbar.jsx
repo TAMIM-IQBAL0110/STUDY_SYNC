@@ -161,6 +161,19 @@ const Navbar = () => {
             </Link>
 
             <Link
+              to="/dashboard/tasks"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
+              style={{
+                backgroundColor: isActive('/dashboard/tasks') ? 'oklch(0.4 0.1 245)' : 'transparent',
+                color: isActive('/dashboard/tasks') ? 'white' : 'oklch(0.4 0.06 245)'
+              }}
+              onClick={() => setIsOpen(false)}
+            >
+              <FiTable size={20} />
+              <span className="font-medium">Tasks</span>
+            </Link>
+
+            <Link
               to="/dashboard/analysis"
               className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
               style={{
@@ -185,6 +198,18 @@ const Navbar = () => {
               <FiUser size={20} />
               <span className="font-medium">Profile</span>
             </Link>
+
+            <button
+              onClick={() => {
+                handleLogout()
+                setIsOpen(false)
+              }}
+              className="w-full flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-left"
+              style={{ backgroundColor: 'oklch(0.85 0.03 245)', color: 'oklch(0.4 0.1 245)' }}
+            >
+              <FiLogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
           </div>
         </div>
       )}

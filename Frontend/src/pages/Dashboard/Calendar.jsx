@@ -74,7 +74,7 @@ const CalendarPage = () => {
       toast.success(`Task moved to ${newStatus.toLowerCase()}`);
       fetchAllTasks();
       if (selectedDate) fetchTasksByDate(selectedDate);
-    } catch (err) {
+    } catch {
       toast.error('Failed to update task');
     }
   };
@@ -140,35 +140,36 @@ const CalendarPage = () => {
   }, [currentMonth]);
 
   return (
-    <div style={{ backgroundColor: THEME.bg, minHeight: '100vh', padding: '20px' }}>
+    <div style={{ backgroundColor: THEME.bg, minHeight: '100vh' }}>
+      <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-6 md:py-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-extrabold mb-2 flex items-center gap-3" style={{ color: THEME.text }}>
-            <FiCalendar size={36} style={{ color: THEME.primary }} />
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-1 md:mb-2 flex items-center gap-2 md:gap-3" style={{ color: THEME.text }}>
+            <FiCalendar size={24} className="md:w-8 md:h-8 lg:w-9 lg:h-9" style={{ color: THEME.primary }} />
             Task Calendar
           </h1>
-          <p style={{ color: 'oklch(0.4 0.06 245)' }}>Organize and track your tasks by date</p>
+          <p style={{ color: 'oklch(0.4 0.06 245)' }} className="text-sm md:text-base">Organize and track your tasks by date</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4 lg:gap-6">
         
         {/* ================= CALENDAR PORTION ================= */}
         <div 
-          className="lg:col-span-7 rounded-2xl shadow-lg p-6 border h-fit"
+          className="lg:col-span-7 rounded-2xl shadow-lg p-3 md:p-4 lg:p-6 border h-fit"
           style={{ backgroundColor: THEME.card, borderColor: THEME.border }}
         >
           {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-6 pb-4 border-b" style={{ borderColor: THEME.border }}>
-            <div>
-              <h2 className="text-2xl font-bold" style={{ color: THEME.text }}>
+          <div className="flex items-start md:items-center justify-between gap-3 mb-4 md:mb-6 pb-3 md:pb-4 border-b" style={{ borderColor: THEME.border }}>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg md:text-xl lg:text-2xl font-bold" style={{ color: THEME.text }}>
                 {monthLabel} 
               </h2>
               <p className="text-xs opacity-70 mt-0.5" style={{ color: THEME.text }}>
                 {yearLabel}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
             <button 
               onClick={() => {
                 setCurrentMonth(new Date());
@@ -177,36 +178,36 @@ const CalendarPage = () => {
                 setSelectedDate(todayStr);
                 fetchTasksByDate(todayStr);
               }}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all hover:shadow-md active:scale-95"
+              className="text-xs font-bold px-2 md:px-3 py-1 md:py-1.5 rounded-lg transition-all hover:shadow-md active:scale-95 whitespace-nowrap"
               style={{ backgroundColor: THEME.bg, color: THEME.primary }}
             >
               Today
             </button>
-              <div className="flex gap-1 bg-gray-100/50 rounded-lg p-1.5">
+              <div className="flex gap-0.5 md:gap-1 bg-gray-100/50 rounded-lg p-1 md:p-1.5">
                 <button 
                   onClick={() => changeMonth(-1)} 
-                  className="p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all"
+                  className="p-1 md:p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all"
                   title="Previous month"
                 >
-                  <FiChevronLeft style={{ color: THEME.primary }} size={18} />
+                  <FiChevronLeft style={{ color: THEME.primary }} size={16} className="md:w-4.5 md:h-4.5" />
                 </button>
                 <button 
                   onClick={() => changeMonth(1)} 
-                  className="p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all"
+                  className="p-1 md:p-1.5 hover:bg-white hover:shadow-sm rounded-md transition-all"
                   title="Next month"
                 >
-                  <FiChevronRight style={{ color: THEME.primary }} size={18} />
+                  <FiChevronRight style={{ color: THEME.primary }} size={16} className="md:w-4.5 md:h-4.5" />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Weekday Headers */}
-          <div className="grid grid-cols-7 gap-2 mb-3">
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1 lg:gap-2 mb-2 md:mb-3">
             {weekDays.map(d => (
               <div 
                 key={d} 
-                className="text-center text-xs font-bold uppercase pb-2 border-b-2" 
+                className="text-center text-xs font-bold uppercase pb-1 md:pb-2 border-b-2" 
                 style={{ color: THEME.primary, borderColor: THEME.border }}
               >
                 {d}
@@ -215,7 +216,7 @@ const CalendarPage = () => {
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1 lg:gap-2">
             {cells.map((day, i) => {
               if (!day) return <div key={`empty-${i}`} />;
               
@@ -236,7 +237,7 @@ const CalendarPage = () => {
                 <div
                   key={day}
                   onClick={() => handleDayClick(day)}
-                  className={`h-14 flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all relative group shadow-sm
+                  className={`h-8 sm:h-10 md:h-12 lg:h-14 flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all relative group shadow-sm
                     ${isSelected ? "shadow-md scale-105 z-10 ring-2 ring-offset-1" : "hover:shadow-md hover:-translate-y-0.5"}
                   `}
                   style={{ 
@@ -245,30 +246,30 @@ const CalendarPage = () => {
                     color: isSelected ? '#fff' : THEME.text
                   }}
                 >
-                  <span className={`text-sm font-bold transition-all`}>
+                  <span className={`text-xs sm:text-sm font-bold transition-all`}>
                     {day}
                   </span>
                   
                   {/* Task indicators */}
                   {taskCount > 0 && (
-                    <div className="flex items-center gap-0.5 mt-1">
+                    <div className="hidden md:flex items-center gap-0.5 mt-0.5 md:mt-1">
                       <div 
-                        className="flex items-center justify-center text-xs font-bold rounded-full w-5 h-5 transition-colors"
+                        className="flex items-center justify-center text-xs font-bold rounded-full w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-colors"
                         style={{ 
                           backgroundColor: isSelected ? 'rgba(255,255,255,0.3)' : THEME.primary,
                           color: '#fff',
-                          fontSize: '10px'
+                          fontSize: '6px'
                         }}
                       >
                         {taskCount}
                       </div>
                       {completedCount > 0 && (
                         <div 
-                          className="text-xs font-bold px-1.5 py-0.5 rounded-full transition-colors"
+                          className="text-xs font-bold px-0.5 sm:px-1 md:px-1.5 py-0.5 rounded-full transition-colors"
                           style={{ 
                             backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'oklch(0.5 0.06 160)',
                             color: '#fff',
-                            fontSize: '9px'
+                            fontSize: '6px'
                           }}
                         >
                           {completedCount}✓
@@ -282,41 +283,41 @@ const CalendarPage = () => {
           </div>
 
           {/* Calendar Footer Legend */}
-          <div className="mt-4 pt-4 border-t flex flex-wrap gap-3 text-xs" style={{ borderColor: THEME.border }}>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: THEME.primary }}></div>
+          <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t flex flex-wrap gap-2 md:gap-3 text-xs" style={{ borderColor: THEME.border }}>
+            <div className="flex items-center gap-1 md:gap-1.5">
+              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: THEME.primary }}></div>
               <span style={{ color: THEME.text }}>Tasks</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: THEME.primary, boxShadow: `0 0 0 1.5px ${THEME.border}` }}></div>
+            <div className="flex items-center gap-1 md:gap-1.5">
+              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: THEME.primary, boxShadow: `0 0 0 1.5px ${THEME.border}` }}></div>
               <span style={{ color: THEME.text }}>Today</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: THEME.primary }}></div>
+            <div className="flex items-center gap-1 md:gap-1.5">
+              <div className="w-2 h-2 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: THEME.primary }}></div>
               <span style={{ color: THEME.text }}>Selected</span>
             </div>
           </div>
         </div>
 
         {/* ================= TASK SIDE PANEL ================= */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
+        <div className="lg:col-span-5 flex flex-col gap-6 md:gap-7">
           <TaskShow
             Icon={FiList}
             Heading={
               <div className="flex items-center justify-between w-full">
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                     <span className="text-xs opacity-50 font-normal">
                         {selectedDate ? new Date(selectedDate.replace(/-/g, '/')).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) : "General"}
                     </span>
-                    <span>Pending Tasks</span>
+                    <span className="text-base md:text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>Pending Tasks</span>
                 </div>
                 {selectedDate && (
                   <button
                     onClick={() => navigate('/dashboard/add-task', { state: { date: selectedDate } })}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-white transition-all hover:shadow-lg active:scale-95"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md font-bold text-xs text-white transition-all hover:shadow-lg active:scale-95 flex-shrink-0 ml-2"
                     style={{ backgroundColor: THEME.primary }}
                   >
-                    <FiPlus size={18} /> New
+                    <FiPlus size={12} style={{ color: 'white' }} /> New
                   </button>
                 )}
               </div>
@@ -330,7 +331,7 @@ const CalendarPage = () => {
 
           <TaskShow
             Icon={FiCheckCircle}
-            Heading="Completed Tasks"
+            Heading={<span className="text-base md:text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>Completed Tasks</span>}
             Tasks={dayTasks.filter(t => t.status === "Completed")}
             footer={selectedDate && dayTasks.filter(t => t.status === "Completed").length === 0 ? "No completed tasks yet" : ""}
             handleCompleteTask={handleCompleteTask}
@@ -338,6 +339,7 @@ const CalendarPage = () => {
             navigate={navigate}
           />
         </div>
+      </div>
       </div>
       </div>
     </div>
