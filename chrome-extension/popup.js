@@ -21,7 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
   loadRecentTasks();
   setDefaultDate();
   loadAuthToken();
+  loadContextMenuData();
 });
+
+// Load data from context menu
+function loadContextMenuData() {
+  chrome.storage.local.get(['selectedText', 'pageUrl'], (result) => {
+    if (result.selectedText) {
+      taskNameInput.value = result.selectedText;
+      chrome.storage.local.remove(['selectedText', 'pageUrl']);
+    }
+  });
+}
 
 // Set default due date to tomorrow
 function setDefaultDate() {
