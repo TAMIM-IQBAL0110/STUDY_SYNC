@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Task Creator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📋 Quick Task</h1>
+      <button id="openApp" class="open-app-btn" title="Open STUDY_SYNC">Open App</button>
+    </div>
+
+    <!-- Form -->
+    <form id="taskForm">
+      <!-- Task Name -->
+      <div class="form-group">
+        <label for="taskName">Task Name *</label>
+        <input 
+          type="text" 
+          id="taskName" 
+          placeholder="Enter task name..."
+          required
+          maxlength="100"
+        >
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description" 
+          placeholder="Add task details..."
+          maxlength="500"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Due Date -->
+      <div class="form-group">
+        <label for="dueDate">Due Date</label>
+        <input type="date" id="dueDate">
+      </div>
+
+      <!-- Priority -->
+      <div class="form-group">
+        <label for="priority">Priority</label>
+        <select id="priority">
+          <option value="Low">🟢 Low</option>
+          <option value="Medium" selected>🟡 Medium</option>
+          <option value="High">🔴 High</option>
+        </select>
+      </div>
+
+      <!-- Category/Subject -->
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input 
+          type="text" 
+          id="category" 
+          placeholder="e.g., Math, English, Work"
+          maxlength="50"
+        >
+      </div>
+
+      <!-- Capture Current Page -->
+      <div class="form-group checkbox">
+        <label>
+          <input type="checkbox" id="captureUrl">
+          <span>Attach current page URL</span>
+        </label>
+      </div>
+
+      <!-- Status Message -->
+      <div id="statusMessage" class="status-message"></div>
+
+      <!-- Buttons -->
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <span class="btn-icon">➕</span> Create Task
+        </button>
+        <button type="button" id="resetBtn" class="btn btn-secondary">
+          Clear
+        </button>
+      </div>
+    </form>
+
+    <!-- Recent Tasks -->
+    <div class="recent-section">
+      <h3>Recent Tasks</h3>
+      <div id="recentTasks" class="recent-tasks-list">
+        <p class="empty-state">No tasks yet</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Made with ❤️ for STUDY_SYNC</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
