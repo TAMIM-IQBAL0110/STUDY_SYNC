@@ -8,6 +8,7 @@ const taskForm = document.getElementById('taskForm');
 const taskNameInput = document.getElementById('taskName');
 const descriptionInput = document.getElementById('description');
 const dueDateInput = document.getElementById('dueDate');
+const startTimeInput = document.getElementById('startTime');
 const categoryInput = document.getElementById('category');
 const captureUrlCheckbox = document.getElementById('captureUrl');
 const resetBtn = document.getElementById('resetBtn');
@@ -42,10 +43,23 @@ function setDefaultDate() {
 
 // Load stored auth token
 function loadAuthToken() {
+  // First try chrome.storage.sync
   chrome.storage.sync.get([AUTH_TOKEN_KEY], (result) => {
-    if (!result[AUTH_TOKEN_KEY]) {
-      showStatus('⚠️ Not logged in. Please log in to STUDY_SYNC first.', 'warning');
+    if (result[AUTH_TOKEN_KEY]) {
+      console.log('✅ Token found in sync storage');
+      return;
     }
+    
+    // If not found, try chrome.storage.local
+    chrome.storage.local.get([AUTH_TOKEN_KEY], (localResult) => {
+      if (localResult[AUTH_TOKEN_KEY]) {
+        console.log('✅ Token found in local storage');
+        return;
+      }
+      // If still not found, show warning
+      console.log('⚠️ No token found, user needs to log in');
+      showStatus('⚠️ Please log in to STUDY_SYNC first.', 'warning');
+    });
   });
 }
 
@@ -63,14 +77,25 @@ taskForm.addEventListener('submit', async (e) => {
     return;
   }
 
-  // Get auth token
+  // Get auth token from sync storage first, then local
   chrome.storage.sync.get([AUTH_TOKEN_KEY], async (result) => {
-    const token = result[AUTH_TOKEN_KEY];
+    let token = result[AUTH_TOKEN_KEY];
+    
+    // If not in sync, try local storage
+    if (!token) {
+      const localResult = await new Promise(resolve => {
+        chrome.storage.local.get([AUTH_TOKEN_KEY], resolve);
+      });
+      token = localResult[AUTH_TOKEN_KEY];
+    }
     
     if (!token) {
       showStatus('❌ Please log in to STUDY_SYNC first', 'error');
+      console.log('❌ No token found in any storage');
       return;
     }
+    
+    console.log('✅ Token found, creating task...');
 
     // Get current page URL if checkbox is selected
     let pageUrl = null;
@@ -80,17 +105,39 @@ taskForm.addEventListener('submit', async (e) => {
     }
 
     // Prepare task data matching backend schema
-    // Convert due date to start time (default to 9:00 AM if no time set)
-    const startTimeMinutes = 9 * 60; // 9:00 AM in minutes from midnight
+    // Convert time input to minutes from midnight
+    const timeStr = startTimeInput.value || '09:00';
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const startTimeMinutes = hours * 60 + minutes;
+    
+    // Validate startTime is in valid range
+    if (startTimeMinutes < 0 || startTimeMinutes >= 1440) {
+      showStatus('❌ Invalid time (must be 00:00 to 23:59)', 'error');
+      return;
+    }
+    
+    // Send date as YYYY-MM-DD (same format as frontend)
+    const dateValue = dueDateInput.value || new Date().toISOString().split('T')[0];
+    
+    // Valid categories from schema
+    const validCategories = ['Class', 'Exam', 'Assignment', 'Exam Prep', 'Project', 'Lab', 'extraCurriculam', 'Others'];
+    const category = categoryInput.value.trim() || 'Others';
+    
+    if (!validCategories.includes(category)) {
+      showStatus(`❌ Invalid category. Must be one of: ${validCategories.join(', ')}`, 'error');
+      return;
+    }
     
     const taskData = {
       name: taskNameInput.value.trim(),
       description: descriptionInput.value.trim() || '',
-      date: dueDateInput.value || new Date().toISOString().split('T')[0],
-      startTime: startTimeMinutes,
-      category: categoryInput.value.trim() || 'Others',
+      date: dateValue, // Send as YYYY-MM-DD (same as frontend)
+      startTime: startTimeMinutes, // in minutes from midnight (0-1440)
+      category: category,
       reminder: false
     };
+    
+    console.log('📤 Sending task data:', JSON.stringify(taskData, null, 2));
 
     try {
       // Show loading state
@@ -114,6 +161,7 @@ taskForm.addEventListener('submit', async (e) => {
         
         // Show success message
         showStatus('✅ Task created successfully!', 'success');
+        console.log('✅ Task created:', newTask);
         
         // Add to recent tasks
         addToRecentTasks(taskData);
@@ -121,6 +169,7 @@ taskForm.addEventListener('submit', async (e) => {
         // Reset form
         taskForm.reset();
         setDefaultDate();
+        startTimeInput.value = '09:00'; // Reset time to 9:00 AM
         captureUrlCheckbox.checked = false;
         
         // Reset button
@@ -129,14 +178,22 @@ taskForm.addEventListener('submit', async (e) => {
           submitBtn.innerHTML = originalText;
         }, 2000);
       } else {
-        const error = await response.json();
-        showStatus(`❌ Error: ${error.message || 'Failed to create task'}`, 'error');
+        const errorText = await response.text();
+        console.error('Server error:', response.status, errorText);
+        
+        try {
+          const error = JSON.parse(errorText);
+          showStatus(`❌ Error: ${error.message || 'Failed to create task'}`, 'error');
+        } catch {
+          showStatus(`❌ Server Error: ${response.status}`, 'error');
+        }
+        
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
       }
     } catch (error) {
-      console.error('Error:', error);
-      showStatus(`❌ Error: ${error.message}`, 'error');
+      console.error('Network error:', error);
+      showStatus(`❌ Network Error: ${error.message}`, 'error');
       const submitBtn = taskForm.querySelector('button[type="submit"]');
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<span class="btn-icon">➕</span> Create Task';
@@ -148,6 +205,7 @@ taskForm.addEventListener('submit', async (e) => {
 resetBtn.addEventListener('click', () => {
   taskForm.reset();
   setDefaultDate();
+  startTimeInput.value = '09:00'; // Reset time to 9:00 AM
   captureUrlCheckbox.checked = false;
   statusMessage.textContent = '';
 });

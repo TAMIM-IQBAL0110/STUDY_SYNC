@@ -7,88 +7,138 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
+  <div class="container" style="background-color: oklch(0.96 0.03 245); min-height: auto; padding: 12px; width: 350px;">
     <!-- Header -->
-    <div class="header">
-      <h1>📋 Quick Task</h1>
-      <button id="openApp" class="open-app-btn" title="Open STUDY_SYNC">Open App</button>
+    <div class="header" style="margin-bottom: 12px;">
+      <h1 style="font-size: 18px; font-weight: bold; margin: 0; color: oklch(0.15 0.06 245);">
+        ➕ Quick Task
+      </h1>
     </div>
 
-    <!-- Form -->
-    <form id="taskForm">
-      <!-- Task Name -->
-      <div class="form-group">
-        <label for="taskName">Task Name *</label>
-        <input 
-          type="text" 
-          id="taskName" 
-          placeholder="Enter task name..."
-          required
-          maxlength="100"
-        >
-      </div>
+    <!-- Main Card -->
+    <div style="background-color: oklch(1 0.03 245); border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+      <!-- Form -->
+      <form id="taskForm" style="display: flex; flex-direction: column; gap: 10px;">
+        
+        <!-- Task Name -->
+        <div>
+          <label for="taskName" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
+            Task Name *
+          </label>
+          <input 
+            type="text" 
+            id="taskName" 
+            placeholder="Enter task name"
+            required
+            maxlength="100"
+            style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; box-sizing: border-box;"
+          />
+        </div>
 
-      <!-- Description -->
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea 
-          id="description" 
-          placeholder="Add task details..."
-          maxlength="500"
-          rows="3"
-        ></textarea>
-      </div>
+        <!-- Date & Time (Side by side) -->
+        <div style="display: flex; gap: 8px;">
+          <!-- Date -->
+          <div style="flex: 1;">
+            <label for="dueDate" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
+              Date *
+            </label>
+            <input 
+              type="date" 
+              id="dueDate"
+              style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; cursor: pointer; box-sizing: border-box;"
+            />
+          </div>
 
-      <!-- Due Date -->
-      <div class="form-group">
-        <label for="dueDate">Due Date</label>
-        <input type="date" id="dueDate">
-      </div>
+          <!-- Start Time -->
+          <div style="flex: 1;">
+            <label for="startTime" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
+              Time *
+            </label>
+            <input 
+              type="time" 
+              id="startTime"
+              value="09:00"
+              style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; cursor: pointer; box-sizing: border-box;"
+            />
+          </div>
+        </div>
 
-      <!-- Category/Subject -->
-      <div class="form-group">
-        <label for="category">Category</label>
-        <input 
-          type="text" 
-          id="category" 
-          placeholder="e.g., Math, English, Work"
-          maxlength="50"
-        >
-      </div>
+        <!-- Category -->
+        <div>
+          <label for="category" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
+            Category
+          </label>
+          <select
+            id="category"
+            style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; cursor: pointer; box-sizing: border-box;"
+          >
+            <option>Class</option>
+            <option>Exam</option>
+            <option>Assignment</option>
+            <option>Exam Prep</option>
+            <option>Project</option>
+            <option>Lab</option>
+            <option>extraCurriculam</option>
+            <option selected>Others</option>
+          </select>
+        </div>
 
-      <!-- Capture Current Page -->
-      <div class="form-group checkbox">
-        <label>
-          <input type="checkbox" id="captureUrl">
-          <span>Attach current page URL</span>
-        </label>
-      </div>
+        <!-- Description -->
+        <div>
+          <label for="description" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
+            Description
+          </label>
+          <textarea 
+            id="description" 
+            placeholder="Add details..."
+            maxlength="300"
+            rows="2"
+            style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; resize: none; font-family: inherit; box-sizing: border-box;"
+          ></textarea>
+        </div>
 
-      <!-- Status Message -->
-      <div id="statusMessage" class="status-message"></div>
+        <!-- Capture URL -->
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+          <input 
+            type="checkbox" 
+            id="captureUrl"
+            style="width: 16px; height: 16px; cursor: pointer; accent-color: oklch(0.4 0.1 245);"
+          />
+          <label for="captureUrl" style="font-weight: 500; cursor: pointer; color: oklch(0.15 0.06 245); margin: 0;">
+            Attach URL
+          </label>
+        </div>
 
-      <!-- Buttons -->
-      <div class="button-group">
-        <button type="submit" class="btn btn-primary">
-          <span class="btn-icon">➕</span> Create Task
-        </button>
-        <button type="button" id="resetBtn" class="btn btn-secondary">
-          Clear
-        </button>
-      </div>
-    </form>
+        <!-- Status Message -->
+        <div id="statusMessage" class="status-message" style="font-size: 12px; margin: 4px 0;"></div>
 
-    <!-- Recent Tasks -->
-    <div class="recent-section">
-      <h3>Recent Tasks</h3>
-      <div id="recentTasks" class="recent-tasks-list">
-        <p class="empty-state">No tasks yet</p>
-      </div>
+        <!-- Buttons -->
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button
+            type="button"
+            id="resetBtn"
+            style="flex: 1; padding: 8px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; background-color: oklch(0.85 0.03 245); color: oklch(0.4 0.06 245); font-size: 12px; transition: all 0.2s;"
+          >
+            Clear
+          </button>
+          <button
+            type="submit"
+            style="flex: 1; padding: 8px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; background-color: oklch(0.4 0.1 245); color: white; font-size: 12px; transition: all 0.2s;"
+          >
+            ➕ Create
+          </button>
+        </div>
+      </form>
     </div>
 
     <!-- Footer -->
-    <div class="footer">
-      <p>Made with ❤️ for STUDY_SYNC</p>
+    <div style="margin-top: 8px; text-align: center;">
+      <button 
+        id="openApp" 
+        style="padding: 6px 12px; border-radius: 6px; border: 1px solid oklch(0.4 0.1 245); background-color: transparent; color: oklch(0.4 0.1 245); font-weight: 600; font-size: 11px; cursor: pointer; transition: all 0.2s;"
+      >
+        📱 Open App
+      </button>
     </div>
   </div>
 
