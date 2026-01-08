@@ -76,33 +76,27 @@ const Home = () => {
     <div style={{ backgroundColor: 'oklch(0.96 0.03 245)', minHeight: '100vh', padding: '20px' }}>
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Total Tasks Card */}
+        
+        {/* Today Completed Tasks Card  */}
         <div>
           <TaskNumberCard
-            taskCount={dashboardStats?.totalTasks || 0}
-            Heading="Total Tasks"
-            Footer="Tasks in your list"
-            Icon={FiTarget}
+            taskCount={dashboardStats?.today?.completed || 0}
+            Heading="Today Completed Tasks"
+            Footer="Tasks completed today"
+            Icon={FiCheckCircle}
+
           />
           <button
-            onClick={() => navigate('/dashboard/add-task')}
-            className="mt-2 w-full py-2 rounded-lg font-semibold text-sm text-white transition-all hover:scale-105"
-            style={{ backgroundColor: 'oklch(0.4 0.1 245)' }}
-          >
-            <FiPlus className="inline mr-1" size={16} />
-            Add Task
-          </button>
+              onClick={() => navigate('/dashboard/add-task')}
+              className="mt-2 w-full py-2 rounded-lg font-semibold text-sm text-white transition-all hover:scale-105"
+              style={{ backgroundColor: 'oklch(0.4 0.1 245)' }}
+            >
+              <FiPlus className="inline mr-1" size={16} />
+              Add Task
+            </button>
         </div>
 
-        {/* Completed Tasks Card */}
-        <TaskNumberCard
-          taskCount={dashboardStats?.today?.completed || 0}
-          Heading="Completed"
-          Footer="Tasks completed today"
-          Icon={FiCheckCircle}
-        />
-
-        {/* Pending Tasks Card */}
+        {/* Pending Tasks Card today */}
         <TaskNumberCard
           taskCount={dashboardStats?.today?.pending || 0}
           Heading="Today Pending Tasks"
@@ -110,15 +104,22 @@ const Home = () => {
           Icon={FiClock}
         />
 
-        {/* Overdue Tasks Card */}
+        {/* Total Tasks Card */}
+        <TaskNumberCard
+          taskCount={dashboardStats?.totalTasks || 0}
+          Heading="Total Tasks All Time"
+          Footer="Tasks in your list"
+          Icon={FiTarget}
+        />
+
+        {/* Total Overdue Tasks Card */}
         <TaskNumberCard
           taskCount={dashboardStats?.overdue?.all || 0}
-          Heading="Overdue"
+          Heading="Overdue Tasks All Time"
           Footer="Tasks overdue"
           Icon={FiAlertCircle}
         />
       </div>
-
       {/* Main Content Grid */}
       {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"> */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
