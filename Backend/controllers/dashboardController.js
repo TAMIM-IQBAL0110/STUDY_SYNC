@@ -37,9 +37,7 @@ export const dashboardData = async(req,res)=>{
             // Sanitize task date - ensure it's in YYYY-MM-DD format
             const taskDateStr = String(task.date).trim().substring(0, 10); // Take first 10 chars: YYYY-MM-DD
             
-            if (taskDateStr === today) {
-                console.log(`✅ Match: taskDate=${taskDateStr} === today=${today}`);
-            }
+            console.log(`   Task: "${task.taskName}" | Raw date=${task.date} | ISO=${typeof task.date.toISOString === 'function' ? task.date.toISOString() : 'N/A'} | Formatted=${taskDateStr} | Today=${today} | Match=${taskDateStr === today ? '✅' : '❌'}`);
             
             if(task.status === "Pending"){
                 pendingTask.push(task);
