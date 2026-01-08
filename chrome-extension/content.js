@@ -35,6 +35,26 @@ function captureAuthToken() {
   }
 }
 
+// Listen for messages from extension popup
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'getToken') {
+    const possibleKeys = ['token', 'authToken', 'studySync_authToken', 'auth_token'];
+    let token = null;
+    
+    for (let key of possibleKeys) {
+      token = localStorage.getItem(key);
+      if (token) {
+        console.log(`✅ Token sent to popup: ${key}`);
+        sendResponse({ token: token });
+        return true;
+      }
+    }
+    
+    // No token found in localStorage
+    sendResponse({ token: null });
+  }
+});
+
 // Capture token immediately
 captureAuthToken();
 

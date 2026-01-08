@@ -84,7 +84,29 @@ function loadAuthToken() {
 
 // Load categories dynamically from backend
 function loadCategories() {
-  // Get auth token
+  // First try to get token from content script (which reads from website localStorage)
+  chrome.tabs.query({ url: '*://studysy.netlify.app/*' }, (tabs) => {
+    if (tabs.length > 0) {
+      console.log('🔄 Requesting token from content script...');
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'getToken' }, (response) => {
+        if (response && response.token) {
+          console.log('✅ Token received from content script');
+          fetchCategoriesWithToken(response.token);
+          return;
+        }
+        
+        // Fallback to chrome storage
+        getTokenFromStorage();
+      });
+    } else {
+      // No StudySync tab open, use chrome storage
+      getTokenFromStorage();
+    }
+  });
+}
+
+function getTokenFromStorage() {
+  // Get auth token from chrome storage
   chrome.storage.sync.get([AUTH_TOKEN_KEY], async (tokenResult) => {
     let token = tokenResult[AUTH_TOKEN_KEY];
     
@@ -234,6 +256,28 @@ taskForm.addEventListener('submit', async (e) => {
   
   console.log('✅ Task name valid:', taskNameInput.value);
 
+  // Try to get token from content script first (fresh from frontend login)
+  chrome.tabs.query({ url: '*://studysy.netlify.app/*' }, (tabs) => {
+    if (tabs.length > 0) {
+      console.log('🔄 Requesting token from content script...');
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'getToken' }, (response) => {
+        if (response && response.token) {
+          console.log('✅ Token received from content script');
+          submitTask(response.token);
+          return;
+        }
+        
+        // Fallback to chrome storage
+        getStoredTokenAndSubmit();
+      });
+    } else {
+      // No StudySync tab open, use chrome storage
+      getStoredTokenAndSubmit();
+    }
+  });
+});
+
+function getStoredTokenAndSubmit() {
   // Get auth token from sync storage first, then local
   chrome.storage.sync.get([AUTH_TOKEN_KEY], async (result) => {
     let token = result[AUTH_TOKEN_KEY];
@@ -253,122 +297,129 @@ taskForm.addEventListener('submit', async (e) => {
     }
     
     console.log('✅ Token found, creating task...');
+    submitTask(token);
+  });
+}
 
-    const category = categoryInput.value.trim() || 'Others';
-    console.log('📌 Selected category value:', JSON.stringify(category));
+function submitTask(token) {
+  const category = categoryInput.value.trim() || 'Others';
+  console.log('📌 Selected category value:', JSON.stringify(category));
     
     // Get cached category names for validation
-    const cachedNames = await new Promise(resolve => {
-      chrome.storage.local.get(['studySync_categoryNames'], (result) => {
-        resolve(result['studySync_categoryNames'] || []);
-      });
+    chrome.storage.local.get(['studySync_categoryNames'], (result) => {
+      const cachedNames = result['studySync_categoryNames'] || [];
+      
+      console.log('📋 Available category names from cache:', cachedNames);
+      
+      if (cachedNames.length === 0) {
+        console.error('❌ No categories available');
+        showStatus('❌ No categories available. Please refresh.', 'error');
+        return;
+      }
+      
+      if (!cachedNames.includes(category)) {
+        console.error('❌ Category validation failed!');
+        console.error('  Selected: "' + category + '"');
+        console.error('  Valid options:', cachedNames);
+        showStatus(`❌ Invalid category. Select from: ${cachedNames.join(', ')}`, 'error');
+        return;
+      }
+      
+      console.log('✅ Category validation passed:', category);
+      
+      // Prepare task data matching backend schema
+      // Convert time input to minutes from midnight
+      const timeStr = startTimeInput.value || '09:00';
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const startTimeMinutes = hours * 60 + minutes;
+      
+      // Validate startTime is in valid range
+      if (startTimeMinutes < 0 || startTimeMinutes >= 1440) {
+        showStatus('❌ Invalid time (must be 00:00 to 23:59)', 'error');
+        return;
+      }
+      
+      // Send date as YYYY-MM-DD (same format as frontend)
+      const dateValue = dueDateInput.value || new Date().toISOString().split('T')[0];
+      
+      const taskData = {
+        name: taskNameInput.value.trim(),
+        description: descriptionInput.value.trim() || '',
+        date: dateValue, // Send as YYYY-MM-DD (same as frontend)
+        startTime: startTimeMinutes, // in minutes from midnight (0-1440)
+        category: category,
+        reminder: false
+      };
+      
+      console.log('📤 Sending task data:', JSON.stringify(taskData, null, 2));
+
+      submitTaskToBackend(taskData, token);
     });
-    
-    console.log('📋 Available category names from cache:', cachedNames);
-    
-    if (cachedNames.length === 0) {
-      console.error('❌ No categories available');
-      showStatus('❌ No categories available. Please refresh.', 'error');
-      return;
-    }
-    
-    if (!cachedNames.includes(category)) {
-      console.error('❌ Category validation failed!');
-      console.error('  Selected: "' + category + '"');
-      console.error('  Valid options:', cachedNames);
-      showStatus(`❌ Invalid category. Select from: ${cachedNames.join(', ')}`, 'error');
-      return;
-    }
-    
-    console.log('✅ Category validation passed:', category);
-    
-    // Prepare task data matching backend schema
-    // Convert time input to minutes from midnight
-    const timeStr = startTimeInput.value || '09:00';
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const startTimeMinutes = hours * 60 + minutes;
-    
-    // Validate startTime is in valid range
-    if (startTimeMinutes < 0 || startTimeMinutes >= 1440) {
-      showStatus('❌ Invalid time (must be 00:00 to 23:59)', 'error');
-      return;
-    }
-    
-    // Send date as YYYY-MM-DD (same format as frontend)
-    const dateValue = dueDateInput.value || new Date().toISOString().split('T')[0];
-    
-    const taskData = {
-      name: taskNameInput.value.trim(),
-      description: descriptionInput.value.trim() || '',
-      date: dateValue, // Send as YYYY-MM-DD (same as frontend)
-      startTime: startTimeMinutes, // in minutes from midnight (0-1440)
-      category: category,
-      reminder: false
-    };
-    
-    console.log('📤 Sending task data:', JSON.stringify(taskData, null, 2));
+}
 
-    try {
-      // Show loading state
-      const submitBtn = taskForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Creating...';
+async function submitTaskToBackend(taskData, token) {
+  try {
+    // Show loading state
+    const submitBtn = taskForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Creating...';
 
-      // Send to backend
-      const response = await fetch(`${API_URL}/api/v1/task/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify(taskData)
-      });
+    // Send to backend
+    const response = await fetch(`${API_URL}/api/v1/task/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include',
+      body: JSON.stringify(taskData)
+    });
 
-      if (response.ok) {
-        const newTask = await response.json();
-        
-        // Show success message
-        showStatus('✅ Task created successfully!', 'success');
-        console.log('✅ Task created:', newTask);
-        
-        // Add to recent tasks
-        addToRecentTasks(taskData);
-        
-        // Reset form
-        taskForm.reset();
-        setDefaultDate();
-        startTimeInput.value = '09:00'; // Reset time to 9:00 AM
-        
-        // Reset button
-        setTimeout(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalText;
-        }, 2000);
-      } else {
-        const errorText = await response.text();
-        console.error('❌ Server error:', response.status, errorText);
-        
-        try {
-          const error = JSON.parse(errorText);
-          showStatus(`❌ Error: ${error.message || 'Failed to create task'}`, 'error');
-        } catch {
-          showStatus(`❌ Server Error ${response.status}: ${errorText || 'Unknown error'}`, 'error');
-        }
-        
+    if (response.ok) {
+      const newTask = await response.json();
+      
+      // Show success message
+      showStatus('✅ Task created successfully!', 'success');
+      console.log('✅ Task created:', newTask);
+      
+      // Add to recent tasks
+      addToRecentTasks(taskData);
+      
+      // Reset form
+      taskForm.reset();
+      setDefaultDate();
+      startTimeInput.value = '09:00'; // Reset time to 9:00 AM
+      
+      // Reset button
+      setTimeout(() => {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
+      }, 2000);
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Server error:', response.status, errorText);
+      
+      try {
+        const error = JSON.parse(errorText);
+        showStatus(`❌ Error: ${error.message || 'Failed to create task'}`, 'error');
+      } catch {
+        showStatus(`❌ Server Error ${response.status}: ${errorText || 'Unknown error'}`, 'error');
       }
-    } catch (error) {
-      console.error('❌ Network error:', error);
-      showStatus(`❌ Network Error: ${error.message}`, 'error');
       
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
-  });
-});
+  } catch (error) {
+    console.error('❌ Network error:', error);
+    showStatus(`❌ Network Error: ${error.message}`, 'error');
+    
+    const submitBtn = taskForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
+}
 
 // Reset form
 resetBtn.addEventListener('click', () => {
