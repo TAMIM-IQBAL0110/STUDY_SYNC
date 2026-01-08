@@ -219,7 +219,7 @@ function populateCategoryDropdown(categories) {
 
 // Open STUDY_SYNC app
 openAppBtn.addEventListener('click', () => {
-  chrome.tabs.create({ url: 'https://studysynch.netlify.app' }); // Frontend app
+  chrome.tabs.create({ url: 'https://studysy.netlify.app' }); // Frontend app
 });
 
 // Handle form submission
