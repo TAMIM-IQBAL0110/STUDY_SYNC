@@ -105,7 +105,8 @@ export const updateTask = async(req,res)=>{
     }
     try{
         // find the task and ensure it belongs to the user
-        const task = await Task.findOne({_id:taskId,user:userId});
+        const task = await Task.findOne({_id:taskId,user:userId})
+            .populate('category', 'name');
         if(!task){
             return res.status(404).json({message:"Task not found"})
         }
@@ -185,7 +186,8 @@ export const deleteTask = async(req,res)=>{
     const {taskId} = req.params; 
     try{
         // find the task and ensure it belongs to the user
-        const task = await Task.findOne({_id:taskId,user:userId});
+        const task = await Task.findOne({_id:taskId,user:userId})
+            .populate('category', 'name');
         if(!task){
             return res.status(404).json({message:"Task is not found"});
         }
@@ -204,7 +206,9 @@ export const deleteTask = async(req,res)=>{
 export const getAllTask = async(req,res)=>{
     const userId = req.user._id;
     try{
-        const tasks = await Task.find({user:userId}).sort({date:-1 , startTime:1});
+        const tasks = await Task.find({user:userId})
+            .populate('category', 'name')
+            .sort({date:-1 , startTime:1});
         //convert startTime back to "HH:MM AM/PM"
         const taskWithFormattedTime = tasks.map(task=>({
             ...task.toObject(),
