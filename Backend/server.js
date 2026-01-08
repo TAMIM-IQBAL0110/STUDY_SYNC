@@ -18,7 +18,7 @@ const app = express();
 // Middleware that parses incoming JSON requests
 app.use(express.json());
 
-const allowedOrigins = (process.env.CLIENT_URL || "https://studysynch.netlify.app,http://localhost:5173").split(',').map(url => url.trim());
+const allowedOrigins = (process.env.CLIENT_URL || "https://studysy.netlify.app,http://localhost:5173").split(',').map(url => url.trim());
 
 // Middleware to handle CORS
 app.use(
