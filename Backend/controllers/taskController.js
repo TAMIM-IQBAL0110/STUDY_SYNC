@@ -210,10 +210,17 @@ export const getAllTask = async(req,res)=>{
             .populate('category', 'name')
             .sort({date:-1 , startTime:1});
         //convert startTime back to "HH:MM AM/PM"
-        const taskWithFormattedTime = tasks.map(task=>({
-            ...task.toObject(),
-            startTimeFormatted:minutesToTime(task.startTime)
-        }));
+        const taskWithFormattedTime = tasks.map(task=>{
+            const taskObj = task.toObject();
+            return {
+                ...taskObj,
+                startTimeFormatted: minutesToTime(task.startTime),
+                category: taskObj.category ? {
+                    _id: taskObj.category._id,
+                    name: taskObj.category.name
+                } : null
+            };
+        });
         res.status(200).json({ tasks: taskWithFormattedTime });
     }catch(error){
         console.error(error);

@@ -3,15 +3,30 @@ import React from 'react';
 const CategoryPieChart = ({ title, tasks, colorScheme, extraHeader }) => {
   // Aggregate tasks into categories
   const categoryCounts = tasks?.reduce((acc, task) => {
-    // Handle both ObjectId strings and populated category objects
     let categoryName = "Others";
+    
+    // Debug: Log the category structure
     if (task.category) {
-      if (typeof task.category === 'object' && task.category.name) {
-        categoryName = task.category.name;  // Populated category object
-      } else if (typeof task.category === 'string' && task.category.length === 24) {
-        categoryName = "Others";  // Old format - just show as Others
+      console.log('Category structure:', task.category, 'Type:', typeof task.category);
+      
+      // If category is an object with name property
+      if (typeof task.category === 'object' && task.category !== null) {
+        if (task.category.name) {
+          categoryName = String(task.category.name).trim();  // Ensure string
+        } else if (task.category._id) {
+          categoryName = "Others";  // Fallback if no name
+        }
+      } 
+      // If category is already a string (old format)
+      else if (typeof task.category === 'string') {
+        if (task.category.length === 24) {
+          categoryName = "Others";  // Old ObjectId format
+        } else {
+          categoryName = String(task.category).trim();  // Use the string as-is
+        }
       }
     }
+    
     acc[categoryName] = (acc[categoryName] || 0) + 1;
     return acc;
   }, {}) || {};
