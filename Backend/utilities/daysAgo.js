@@ -1,14 +1,23 @@
 export const daysAgo = (n)=>{
+    // Create a date in the user's local timezone (or system timezone)
+    // by creating the date object and then getting its components
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
     
-    const day = new Date(today);
-    day.setDate(day.getDate()-n);
-    day.setHours(0,0,0,0);
+    // Get the date components (these are in local time by default)
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
     
-    // Return YYYY-MM-DD string format instead of Date object
-    const year = day.getFullYear();
-    const month = String(day.getMonth() + 1).padStart(2, '0');
-    const date = String(day.getDate()).padStart(2, '0');
-    return `${year}-${month}-${date}`;
+    // Create reference date string for today in YYYY-MM-DD format
+    let refDate = new Date(`${year}-${month}-${date}`);
+    
+    // Subtract n days
+    refDate.setDate(refDate.getDate() - n);
+    
+    // Convert back to YYYY-MM-DD string
+    const year2 = refDate.getFullYear();
+    const month2 = String(refDate.getMonth() + 1).padStart(2, '0');
+    const date2 = String(refDate.getDate()).padStart(2, '0');
+    
+    return `${year2}-${month2}-${date2}`;
 };
