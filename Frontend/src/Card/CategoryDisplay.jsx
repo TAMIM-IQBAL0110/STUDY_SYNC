@@ -9,10 +9,6 @@ const DEFAULT_CATEGORIES_FALLBACK = [
   { name: "Class", isDefault: true },
   { name: "Exam", isDefault: true },
   { name: "Assignment", isDefault: true },
-  { name: "Exam Prep", isDefault: true },
-  { name: "Project", isDefault: true },
-  { name: "Lab", isDefault: true },
-  { name: "Extra Curricular", isDefault: true },
   { name: "Others", isDefault: true }
 ]
 
