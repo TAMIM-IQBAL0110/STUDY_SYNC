@@ -143,9 +143,6 @@ async function fetchCategoriesWithToken(token) {
       console.log('📋 Falling back to default categories');
       populateCategoryDropdown(DEFAULT_CATEGORIES);
     }
-      populateCategoryDropdown(DEFAULT_CATEGORIES);
-      showStatus('Failed to load categories', 'error');
-    }
   } catch (error) {
     console.error('❌ Error fetching categories:', error);
     populateCategoryDropdown(DEFAULT_CATEGORIES);
