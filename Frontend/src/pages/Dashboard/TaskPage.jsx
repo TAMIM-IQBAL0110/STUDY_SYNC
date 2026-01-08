@@ -60,7 +60,7 @@ const TaskPage = () => {
       await axiosInstance.delete(API_PATH.TASK.DELETE_TASK(taskId));
       toast.success('Task deleted successfully');
       fetchTasks(); // Refresh list
-    } catch (err) {
+    } catch{
       toast.error('Failed to delete task');
     }
   };
