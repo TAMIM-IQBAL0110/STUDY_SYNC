@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import axiosInstance from '../../utilities/axiosInstance.js'
 import { API_PATH } from '../../utilities/apiPath.js'
 import toast from 'react-hot-toast'
-import CategoryDisplay from '../../Card/categoryDisplay.jsx'
+import CategoryDisplay from '../../Card/CategoryDisplay.jsx'
 import ProfileInfoCard from '../../Card/ProfileInfoCard.jsx'
 import AccountSetting from '../../Card/AccountSetting.jsx'
 
