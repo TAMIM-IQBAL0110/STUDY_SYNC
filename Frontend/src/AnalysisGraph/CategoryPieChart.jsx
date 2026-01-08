@@ -3,8 +3,16 @@ import React from 'react';
 const CategoryPieChart = ({ title, tasks, colorScheme, extraHeader }) => {
   // Aggregate tasks into categories
   const categoryCounts = tasks?.reduce((acc, task) => {
-    const cat = task.category || "Others";
-    acc[cat] = (acc[cat] || 0) + 1;
+    // Handle both ObjectId strings and populated category objects
+    let categoryName = "Others";
+    if (task.category) {
+      if (typeof task.category === 'object' && task.category.name) {
+        categoryName = task.category.name;  // Populated category object
+      } else if (typeof task.category === 'string' && task.category.length === 24) {
+        categoryName = "Others";  // Old format - just show as Others
+      }
+    }
+    acc[categoryName] = (acc[categoryName] || 0) + 1;
     return acc;
   }, {}) || {};
 
