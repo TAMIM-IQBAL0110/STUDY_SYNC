@@ -153,6 +153,7 @@ taskForm.addEventListener('submit', async (e) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify(taskData)
       });
 

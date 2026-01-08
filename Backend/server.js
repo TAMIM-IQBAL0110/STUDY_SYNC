@@ -17,23 +17,26 @@ const app = express();
 // Middleware that parses incoming JSON requests
 app.use(express.json());
 
-const allowedOrigins = (process.env.CLIENT_URL || "*").split(',').map(url => url.trim());
-//Middleware to handle CORS
+const allowedOrigins = (process.env.CLIENT_URL || "https://studysynch.netlify.app,http://localhost:5173").split(',').map(url => url.trim());
+
 // Middleware to handle CORS
 app.use(
     cors({
         origin: function (origin, callback) {
-            // 1. Allow internal requests (no origin, e.g., mobile apps or Postman)
-            // 2. Allow if origin matches your environment variable list
-            // 3. Allow if origin starts with chrome-extension://
+            // Allow requests with no origin (like mobile apps or Postman)
+            // Allow Chrome extension requests
+            // Allow localhost for development
+            // Allow configured CLIENT_URL
             if (
                 !origin || 
+                (origin && origin.startsWith('chrome-extension://')) ||
+                (origin && origin.includes('localhost')) ||
                 allowedOrigins.includes('*') || 
-                allowedOrigins.includes(origin) || 
-                origin.startsWith('chrome-extension://')
+                (origin && allowedOrigins.includes(origin))
             ) {
                 callback(null, true);
             } else {
+                console.warn(`❌ CORS blocked origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
