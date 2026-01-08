@@ -155,6 +155,7 @@ const AddTask = () => {
               name="date"
               value={formData.date}
               onChange={handleChange}
+              min={today}
               className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all"
               style={{
                 borderColor: 'oklch(0.85 0.03 245)',

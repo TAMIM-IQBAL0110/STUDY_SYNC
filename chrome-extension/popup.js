@@ -34,11 +34,19 @@ function loadContextMenuData() {
   });
 }
 
-// Set default due date to tomorrow
+// Set default due date to today and block previous dates
 function setDefaultDate() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  dueDateInput.valueAsDate = tomorrow;
+  const today = new Date();
+  
+  // Format as YYYY-MM-DD to avoid timezone issues
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const dateString = `${year}-${month}-${day}`;
+  
+  // Set default value and minimum allowed date
+  dueDateInput.value = dateString;
+  dueDateInput.min = dateString;
 }
 
 // Load stored auth token

@@ -190,6 +190,7 @@ const EditTask = () => {
                 name="date"
                 value={formData.date}
                 onChange={handleChange}
+                min={new Date().toISOString().split('T')[0]}
                 className="w-full p-3 rounded-lg"
                 style={inputBaseStyle}
               />
