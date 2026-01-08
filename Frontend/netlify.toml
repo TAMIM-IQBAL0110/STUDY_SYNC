@@ -10,6 +10,11 @@ VITE_BASE_URL = "https://study-sync-mv99.onrender.com"
 from = "/*"
 to = "/index.html"
 status = 200
+conditions = { NOT = {path = "/api/*"} }
+
+[[redirects]]
+from = "/api/*"
+status = 404
 
 [context.production.environment]
 VITE_BASE_URL = "https://study-sync-mv99.onrender.com"
