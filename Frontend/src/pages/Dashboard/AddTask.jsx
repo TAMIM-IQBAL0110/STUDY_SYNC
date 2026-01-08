@@ -47,6 +47,12 @@ const AddTask = () => {
       toast.error('Task name is required')
       return
     }
+    
+    // Validate date - prevent past dates
+    if (formData.date < today) {
+      toast.error('Cannot save task with past date')
+      return
+    }
 
     setLoading(true)
     try {

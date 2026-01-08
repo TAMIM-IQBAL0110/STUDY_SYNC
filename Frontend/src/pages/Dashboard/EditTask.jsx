@@ -90,6 +90,13 @@ const EditTask = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!formData.name.trim()) return toast.error('Task name is required')
+    
+    // Validate date - prevent past dates
+    const today = new Date().toISOString().split('T')[0]
+    if (formData.date < today) {
+      toast.error('Cannot save task with past date')
+      return
+    }
 
     setLoading(true)
     try {
