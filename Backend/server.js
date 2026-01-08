@@ -19,17 +19,26 @@ app.use(express.json());
 
 const allowedOrigins = (process.env.CLIENT_URL || "*").split(',').map(url => url.trim());
 //Middleware to handle CORS
+// Middleware to handle CORS
 app.use(
     cors({
         origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-                callback(null, true);  // Send only the requesting origin ✅
+            // 1. Allow internal requests (no origin, e.g., mobile apps or Postman)
+            // 2. Allow if origin matches your environment variable list
+            // 3. Allow if origin starts with chrome-extension://
+            if (
+                !origin || 
+                allowedOrigins.includes('*') || 
+                allowedOrigins.includes(origin) || 
+                origin.startsWith('chrome-extension://')
+            ) {
+                callback(null, true);
             } else {
                 callback(new Error('Not allowed by CORS'));
             }
         },
-        methods:["GET","POST","DELETE","PUT"],
-        allowedHeaders:["Content-Type","Authorization"],
+        methods: ["GET", "POST", "DELETE", "PUT"],
+        allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true
     })
 );
