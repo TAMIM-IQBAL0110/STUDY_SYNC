@@ -2,6 +2,17 @@
 const API_URL = 'https://study-sync-mv99.onrender.com'; // Production backend
 const AUTH_TOKEN_KEY = 'studySync_authToken';
 const RECENT_TASKS_KEY = 'recentTasks';
+const CATEGORIES_CACHE_KEY = 'studySync_categories';
+const CATEGORIES_CACHE_TIME_KEY = 'studySync_categoriesCacheTime';
+const CACHE_DURATION = 300000; // 5 minutes in milliseconds
+
+// Default categories fallback
+const DEFAULT_CATEGORIES = [
+  'Class',
+  'Exam',
+  'Assignment',
+  'Others'
+];
 
 // DOM Elements
 const taskForm = document.getElementById('taskForm');
@@ -10,7 +21,6 @@ const descriptionInput = document.getElementById('description');
 const dueDateInput = document.getElementById('dueDate');
 const startTimeInput = document.getElementById('startTime');
 const categoryInput = document.getElementById('category');
-const captureUrlCheckbox = document.getElementById('captureUrl');
 const resetBtn = document.getElementById('resetBtn');
 const statusMessage = document.getElementById('statusMessage');
 const openAppBtn = document.getElementById('openApp');
@@ -22,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setDefaultDate();
   loadAuthToken();
   loadContextMenuData();
+  loadCategories();
 });
 
 // Load data from context menu
@@ -49,7 +60,7 @@ function setDefaultDate() {
   dueDateInput.min = dateString;
 }
 
-// Load stored auth token
+// Load auth token
 function loadAuthToken() {
   // First try chrome.storage.sync
   chrome.storage.sync.get([AUTH_TOKEN_KEY], (result) => {
@@ -71,6 +82,134 @@ function loadAuthToken() {
   });
 }
 
+// Load categories dynamically from backend
+function loadCategories() {
+  // Get auth token
+  chrome.storage.sync.get([AUTH_TOKEN_KEY], async (tokenResult) => {
+    let token = tokenResult[AUTH_TOKEN_KEY];
+    
+    if (!token) {
+      const localResult = await new Promise(resolve => {
+        chrome.storage.local.get([AUTH_TOKEN_KEY], resolve);
+      });
+      token = localResult[AUTH_TOKEN_KEY];
+    }
+    
+    if (!token) {
+      console.log('⚠️ No token, using default categories');
+      populateCategoryDropdown(DEFAULT_CATEGORIES);
+      return;
+    }
+    
+    // Fetch categories directly
+    console.log('🔄 Fetching categories with token...');
+    fetchCategoriesWithToken(token);
+  });
+}
+
+// Fetch categories with token
+async function fetchCategoriesWithToken(token) {
+  try {
+    console.log('🔄 Fetching categories...');
+    
+    const response = await fetch(`${API_URL}/api/v1/category`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include'
+    });
+    
+    console.log('📊 Response status:', response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      const allCategories = data.categories || [];
+      
+      if (allCategories && allCategories.length > 0) {
+        console.log('✅ Categories loaded:', allCategories.length);
+        populateCategoryDropdown(allCategories);
+      } else {
+        console.log('⚠️ No categories found, using defaults');
+        populateCategoryDropdown(DEFAULT_CATEGORIES);
+      }
+    } else {
+      console.log('⚠️ Failed to fetch categories, status:', response.status);
+      const errorText = await response.text();
+      console.log('Error:', errorText);
+      populateCategoryDropdown(DEFAULT_CATEGORIES);
+      showStatus('Failed to load categories', 'error');
+    }
+  } catch (error) {
+    console.error('❌ Error fetching categories:', error);
+    populateCategoryDropdown(DEFAULT_CATEGORIES);
+    showStatus('Error loading categories', 'error');
+  }
+}
+
+// Populate category dropdown with API categories
+function populateCategoryDropdown(categories) {
+  const categorySelect = document.getElementById('category');
+  if (!categorySelect) return;
+  
+  console.log('🎨 Populating dropdown, received:', categories);
+  console.log('🎨 Type of categories:', typeof categories);
+  
+  categorySelect.innerHTML = '';
+  
+  if (!categories || categories.length === 0) {
+    console.log('⚠️ No categories provided');
+    const option = document.createElement('option');
+    option.textContent = 'No categories available';
+    categorySelect.appendChild(option);
+    return;
+  }
+  
+  // Extract category names - handle both string and object formats
+  let categoryNames = [];
+  categories.forEach(cat => {
+    let name;
+    if (typeof cat === 'string') {
+      name = cat;
+    } else if (cat && cat.name) {
+      name = cat.name;
+    }
+    if (name && name.trim()) {
+      categoryNames.push(name);
+    }
+  });
+  
+  console.log('📋 Final category names to display:', categoryNames);
+  
+  // Remove duplicates
+  categoryNames = [...new Set(categoryNames)];
+  
+  if (categoryNames.length === 0) {
+    console.log('⚠️ No valid category names extracted');
+    return;
+  }
+  
+  // Populate all categories
+  categoryNames.forEach((name) => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    categorySelect.appendChild(option);
+    console.log('➕ Added option:', name);
+  });
+  
+  // Default to 'Others' if available
+  const othersOption = Array.from(categorySelect.options).find(opt => opt.value === 'Others');
+  if (othersOption) {
+    categorySelect.value = 'Others';
+  }
+  
+  console.log('✅ Dropdown populated with', categoryNames.length, 'categories');
+}
+
+// Handle form submission
+
 // Open STUDY_SYNC app
 openAppBtn.addEventListener('click', () => {
   chrome.tabs.create({ url: 'https://studysynch.netlify.app' }); // Frontend app
@@ -79,11 +218,14 @@ openAppBtn.addEventListener('click', () => {
 // Handle form submission
 taskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+  console.log('📝 Form submitted, validating...');
   
   if (!taskNameInput.value.trim()) {
     showStatus('❌ Please enter a task name', 'error');
     return;
   }
+  
+  console.log('✅ Task name valid:', taskNameInput.value);
 
   // Get auth token from sync storage first, then local
   chrome.storage.sync.get([AUTH_TOKEN_KEY], async (result) => {
@@ -105,13 +247,6 @@ taskForm.addEventListener('submit', async (e) => {
     
     console.log('✅ Token found, creating task...');
 
-    // Get current page URL if checkbox is selected
-    let pageUrl = null;
-    if (captureUrlCheckbox.checked) {
-      const tab = await chrome.tabs.query({ active: true, currentWindow: true });
-      pageUrl = tab[0].url;
-    }
-
     // Prepare task data matching backend schema
     // Convert time input to minutes from midnight
     const timeStr = startTimeInput.value || '09:00';
@@ -127,14 +262,49 @@ taskForm.addEventListener('submit', async (e) => {
     // Send date as YYYY-MM-DD (same format as frontend)
     const dateValue = dueDateInput.value || new Date().toISOString().split('T')[0];
     
-    // Valid categories from schema
-    const validCategories = ['Class', 'Exam', 'Assignment', 'Exam Prep', 'Project', 'Lab', 'extraCurriculam', 'Others'];
-    const category = categoryInput.value.trim() || 'Others';
+    // Get current categories from cache or use defaults
+    const currentCategories = await new Promise(resolve => {
+      chrome.storage.local.get([CATEGORIES_CACHE_KEY], (result) => {
+        const cats = result[CATEGORIES_CACHE_KEY] || DEFAULT_CATEGORIES.map(name => ({
+          name,
+          isDefault: true
+        }));
+        resolve(cats);
+      });
+    });
     
-    if (!validCategories.includes(category)) {
-      showStatus(`❌ Invalid category. Must be one of: ${validCategories.join(', ')}`, 'error');
+    const category = categoryInput.value.trim() || 'Others';
+    console.log('📌 Selected category:', JSON.stringify(category));
+    console.log('📌 Available categories (raw):', JSON.stringify(currentCategories));
+    
+    // Extract category names - using same logic as populateCategoryDropdown
+    let categoryNames = [];
+    currentCategories.forEach(cat => {
+      let name;
+      if (typeof cat === 'string') {
+        name = cat;
+      } else if (cat && cat.name) {
+        name = cat.name;
+      }
+      if (name && name.trim()) {
+        categoryNames.push(name.trim());
+      }
+    });
+    
+    console.log('📋 Extracted valid category names:', categoryNames);
+    
+    // Remove duplicates
+    categoryNames = [...new Set(categoryNames)];
+    
+    if (!categoryNames.includes(category)) {
+      console.error('❌ Category validation failed!');
+      console.error('  Looking for: "' + category + '"');
+      console.error('  Valid options:', categoryNames);
+      showStatus(`❌ Invalid category. Must be one of: ${categoryNames.join(', ')}`, 'error');
       return;
     }
+    
+    console.log('✅ Category validation passed:', category);
     
     const taskData = {
       name: taskNameInput.value.trim(),
@@ -179,7 +349,6 @@ taskForm.addEventListener('submit', async (e) => {
         taskForm.reset();
         setDefaultDate();
         startTimeInput.value = '09:00'; // Reset time to 9:00 AM
-        captureUrlCheckbox.checked = false;
         
         // Reset button
         setTimeout(() => {
@@ -188,24 +357,24 @@ taskForm.addEventListener('submit', async (e) => {
         }, 2000);
       } else {
         const errorText = await response.text();
-        console.error('Server error:', response.status, errorText);
+        console.error('❌ Server error:', response.status, errorText);
         
         try {
           const error = JSON.parse(errorText);
           showStatus(`❌ Error: ${error.message || 'Failed to create task'}`, 'error');
         } catch {
-          showStatus(`❌ Server Error: ${response.status}`, 'error');
+          showStatus(`❌ Server Error ${response.status}: ${errorText || 'Unknown error'}`, 'error');
         }
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
       }
     } catch (error) {
-      console.error('Network error:', error);
+      console.error('❌ Network error:', error);
       showStatus(`❌ Network Error: ${error.message}`, 'error');
-      const submitBtn = taskForm.querySelector('button[type="submit"]');
+      
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<span class="btn-icon">➕</span> Create Task';
+      submitBtn.innerHTML = originalText;
     }
   });
 });
@@ -215,19 +384,33 @@ resetBtn.addEventListener('click', () => {
   taskForm.reset();
   setDefaultDate();
   startTimeInput.value = '09:00'; // Reset time to 9:00 AM
-  captureUrlCheckbox.checked = false;
   statusMessage.textContent = '';
 });
 
 // Show status message
+// Show status message with visibility
 function showStatus(message, type) {
+  statusMessage.style.display = 'block';
   statusMessage.textContent = message;
   statusMessage.className = `status-message ${type}`;
   
+  // Style based on type
   if (type === 'success') {
+    statusMessage.style.backgroundColor = 'oklch(0.8 0.05 160)';
+    statusMessage.style.color = 'oklch(0.25 0.06 160)';
+    console.log('✅ ' + message);
     setTimeout(() => {
+      statusMessage.style.display = 'none';
       statusMessage.textContent = '';
     }, 3000);
+  } else if (type === 'error') {
+    statusMessage.style.backgroundColor = 'oklch(0.9 0.04 30)';
+    statusMessage.style.color = 'oklch(0.5 0.06 30)';
+    console.log('❌ ' + message);
+  } else if (type === 'warning') {
+    statusMessage.style.backgroundColor = 'oklch(0.9 0.04 60)';
+    statusMessage.style.color = 'oklch(0.5 0.06 60)';
+    console.log('⚠️ ' + message);
   }
 }
 
@@ -281,6 +464,42 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Re-login button - clear token
+const reloginBtn = document.getElementById('reloginBtn');
+if (reloginBtn) {
+  reloginBtn.addEventListener('click', () => {
+    console.log('🔐 Clearing token...');
+    chrome.storage.sync.remove([AUTH_TOKEN_KEY], () => {
+      chrome.storage.local.remove([AUTH_TOKEN_KEY], () => {
+        showStatus('✅ Token cleared. Please refresh.', 'success');
+      });
+    });
+  });
+}
+
+// Refresh categories button
+const refreshCategoriesBtn = document.getElementById('refreshCategoriesBtn');
+if (refreshCategoriesBtn) {
+  refreshCategoriesBtn.addEventListener('click', () => {
+    console.log('🔄 Manually refreshing categories...');
+    refreshCategoriesBtn.style.opacity = '0.5';
+    refreshCategoriesBtn.disabled = true;
+    
+    // Clear cache
+    chrome.storage.local.remove([CATEGORIES_CACHE_KEY, CATEGORIES_CACHE_TIME_KEY], () => {
+      // Reload categories
+      loadCategories();
+      showStatus('✅ Categories refreshed!', 'success');
+      
+      // Re-enable button after 1 second
+      setTimeout(() => {
+        refreshCategoriesBtn.style.opacity = '1';
+        refreshCategoriesBtn.disabled = false;
+      }, 1000);
+    });
+  });
 }
 
 // Context Menu Integration (optional)

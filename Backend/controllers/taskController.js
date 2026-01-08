@@ -1,4 +1,5 @@
 import Task from '../models/taskSchema.js'
+import Category from '../models/categorySchema.js'
 import { convertToMinutes } from '../utilities/convertToMinutes.js';
 import { minutesToTime } from './../utilities/minutesToTime.js';
 
@@ -30,10 +31,26 @@ export const addTask = async(req,res)=>{
         if(!isValidStartTime(plainTime) || plainTime==null) return res.status(400).json({
             message: "Invalid startTime"
         })
+        
+        // Convert category name (string) to ObjectId
+        let categoryId = category;
+        if (typeof category === 'string') {
+            const categoryDoc = await Category.findOne({ 
+                user: userId, 
+                name: category.trim()
+            });
+            if (!categoryDoc) {
+                return res.status(400).json({
+                    message: `Category "${category}" not found for user`
+                });
+            }
+            categoryId = categoryDoc._id;
+        }
+        
         const task = await Task.create({
             user:userId,
             taskName:name,
-            category:category,
+            category:categoryId,
             date:date,
             startTime:plainTime,
             description:description,
@@ -66,7 +83,25 @@ export const updateTask = async(req,res)=>{
         // Update only provided fields
         let plainTime = startTime;
         if (name !== undefined) task.taskName = name;
-        if (category !== undefined) task.category = category;
+        
+        // Handle category - convert name to ObjectId if needed
+        if (category !== undefined) {
+            if (typeof category === 'string') {
+                const categoryDoc = await Category.findOne({ 
+                    user: userId, 
+                    name: category.trim()
+                });
+                if (!categoryDoc) {
+                    return res.status(400).json({
+                        message: `Category "${category}" not found for user`
+                    });
+                }
+                task.category = categoryDoc._id;
+            } else {
+                task.category = category;
+            }
+        }
+        
         if (date !== undefined) task.date = date;
         if (plainTime !== undefined){
             if (typeof plainTime === 'string') plainTime = convertToMinutes(startTime);

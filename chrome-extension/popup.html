@@ -35,9 +35,8 @@
           />
         </div>
 
-        <!-- Date & Time (Side by side) -->
+        <!-- Date & Time -->
         <div style="display: flex; gap: 8px;">
-          <!-- Date -->
           <div style="flex: 1;">
             <label for="dueDate" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
               Date *
@@ -48,8 +47,6 @@
               style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; cursor: pointer; box-sizing: border-box;"
             />
           </div>
-
-          <!-- Start Time -->
           <div style="flex: 1;">
             <label for="startTime" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
               Time *
@@ -66,20 +63,13 @@
         <!-- Category -->
         <div>
           <label for="category" style="display: block; font-weight: 600; margin-bottom: 4px; color: oklch(0.15 0.06 245); font-size: 12px;">
-            Category
+            Category *
           </label>
           <select
             id="category"
             style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; cursor: pointer; box-sizing: border-box;"
           >
-            <option>Class</option>
-            <option>Exam</option>
-            <option>Assignment</option>
-            <option>Exam Prep</option>
-            <option>Project</option>
-            <option>Lab</option>
-            <option>extraCurriculam</option>
-            <option selected>Others</option>
+            <option>Loading...</option>
           </select>
         </div>
 
@@ -90,60 +80,52 @@
           </label>
           <textarea 
             id="description" 
-            placeholder="Add details..."
-            maxlength="300"
+            placeholder="Add description (optional)"
             rows="2"
-            style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; resize: none; font-family: inherit; box-sizing: border-box;"
+            maxlength="300"
+            style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid oklch(0.85 0.03 245); color: oklch(0.15 0.06 245); background-color: oklch(0.96 0.03 245); font-size: 12px; outline: none; resize: none; box-sizing: border-box;"
           ></textarea>
         </div>
 
-        <!-- Capture URL -->
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
-          <input 
-            type="checkbox" 
-            id="captureUrl"
-            style="width: 16px; height: 16px; cursor: pointer; accent-color: oklch(0.4 0.1 245);"
-          />
-          <label for="captureUrl" style="font-weight: 500; cursor: pointer; color: oklch(0.15 0.06 245); margin: 0;">
-            Attach URL
-          </label>
-        </div>
-
         <!-- Status Message -->
-        <div id="statusMessage" class="status-message" style="font-size: 12px; margin: 4px 0;"></div>
+        <div id="statusMessage" style="font-size: 12px; padding: 6px; border-radius: 4px; display: none;"></div>
 
         <!-- Buttons -->
         <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <button
-            type="button"
+          <button 
+            type="submit" 
+            style="flex: 1; padding: 8px; background-color: oklch(0.4 0.1 245); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s;"
+          >
+            Add Task
+          </button>
+          <button 
+            type="button" 
             id="resetBtn"
-            style="flex: 1; padding: 8px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; background-color: oklch(0.85 0.03 245); color: oklch(0.4 0.06 245); font-size: 12px; transition: all 0.2s;"
+            style="flex: 1; padding: 8px; background-color: oklch(0.85 0.03 245); color: oklch(0.4 0.06 245); border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s;"
           >
             Clear
-          </button>
-          <button
-            type="submit"
-            style="flex: 1; padding: 8px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; background-color: oklch(0.4 0.1 245); color: white; font-size: 12px; transition: all 0.2s;"
-          >
-            ➕ Create
           </button>
         </div>
       </form>
 
-      <!-- Recent Tasks Section -->
+      <!-- Recent Tasks -->
       <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid oklch(0.85 0.03 245);">
-        <h3 style="font-size: 12px; font-weight: 600; margin: 0 0 8px 0; color: oklch(0.15 0.06 245);">📋 Recent Tasks</h3>
-        <div id="recentTasks" style="max-height: 120px; overflow-y: auto;"></div>
+        <h3 style="font-size: 12px; font-weight: 600; color: oklch(0.15 0.06 245); margin: 0 0 8px 0;">
+          📋 Recent Tasks
+        </h3>
+        <div id="recentTasks" style="max-height: 150px; overflow-y: auto; space-y: 6px;">
+          <p style="font-size: 11px; color: oklch(0.4 0.06 245); margin: 0;">No recent tasks</p>
+        </div>
       </div>
     </div>
 
     <!-- Footer -->
-    <div style="margin-top: 8px; text-align: center;">
+    <div style="margin-top: 12px; text-align: center;">
       <button 
-        id="openApp" 
-        style="padding: 6px 12px; border-radius: 6px; border: 1px solid oklch(0.4 0.1 245); background-color: transparent; color: oklch(0.4 0.1 245); font-weight: 600; font-size: 11px; cursor: pointer; transition: all 0.2s;"
+        id="openApp"
+        style="padding: 8px 12px; background-color: oklch(0.4 0.1 65); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;"
       >
-        📱 Open App
+        Open STUDY_SYNC
       </button>
     </div>
   </div>
