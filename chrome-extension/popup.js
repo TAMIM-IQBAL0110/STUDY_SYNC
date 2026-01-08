@@ -176,7 +176,7 @@ function populateCategoryDropdown(categories) {
       name = cat.name;
     }
     if (name && name.trim()) {
-      categoryNames.push(name);
+      categoryNames.push(name.trim());
     }
   });
   
@@ -190,13 +190,18 @@ function populateCategoryDropdown(categories) {
     return;
   }
   
-  // Populate all categories
+  // Populate all categories - use NAME as both value and display text
   categoryNames.forEach((name) => {
     const option = document.createElement('option');
-    option.value = name;
+    option.value = name;  // IMPORTANT: Use name as value, NOT ObjectId
     option.textContent = name;
     categorySelect.appendChild(option);
     console.log('➕ Added option:', name);
+  });
+  
+  // Cache just the category names for validation
+  chrome.storage.local.set({
+    'studySync_categoryNames': categoryNames
   });
   
   // Default to 'Others' if available
@@ -247,6 +252,34 @@ taskForm.addEventListener('submit', async (e) => {
     
     console.log('✅ Token found, creating task...');
 
+    const category = categoryInput.value.trim() || 'Others';
+    console.log('📌 Selected category value:', JSON.stringify(category));
+    
+    // Get cached category names for validation
+    const cachedNames = await new Promise(resolve => {
+      chrome.storage.local.get(['studySync_categoryNames'], (result) => {
+        resolve(result['studySync_categoryNames'] || []);
+      });
+    });
+    
+    console.log('📋 Available category names from cache:', cachedNames);
+    
+    if (cachedNames.length === 0) {
+      console.error('❌ No categories available');
+      showStatus('❌ No categories available. Please refresh.', 'error');
+      return;
+    }
+    
+    if (!cachedNames.includes(category)) {
+      console.error('❌ Category validation failed!');
+      console.error('  Selected: "' + category + '"');
+      console.error('  Valid options:', cachedNames);
+      showStatus(`❌ Invalid category. Select from: ${cachedNames.join(', ')}`, 'error');
+      return;
+    }
+    
+    console.log('✅ Category validation passed:', category);
+    
     // Prepare task data matching backend schema
     // Convert time input to minutes from midnight
     const timeStr = startTimeInput.value || '09:00';
@@ -261,50 +294,6 @@ taskForm.addEventListener('submit', async (e) => {
     
     // Send date as YYYY-MM-DD (same format as frontend)
     const dateValue = dueDateInput.value || new Date().toISOString().split('T')[0];
-    
-    // Get current categories from cache or use defaults
-    const currentCategories = await new Promise(resolve => {
-      chrome.storage.local.get([CATEGORIES_CACHE_KEY], (result) => {
-        const cats = result[CATEGORIES_CACHE_KEY] || DEFAULT_CATEGORIES.map(name => ({
-          name,
-          isDefault: true
-        }));
-        resolve(cats);
-      });
-    });
-    
-    const category = categoryInput.value.trim() || 'Others';
-    console.log('📌 Selected category:', JSON.stringify(category));
-    console.log('📌 Available categories (raw):', JSON.stringify(currentCategories));
-    
-    // Extract category names - using same logic as populateCategoryDropdown
-    let categoryNames = [];
-    currentCategories.forEach(cat => {
-      let name;
-      if (typeof cat === 'string') {
-        name = cat;
-      } else if (cat && cat.name) {
-        name = cat.name;
-      }
-      if (name && name.trim()) {
-        categoryNames.push(name.trim());
-      }
-    });
-    
-    console.log('📋 Extracted valid category names:', categoryNames);
-    
-    // Remove duplicates
-    categoryNames = [...new Set(categoryNames)];
-    
-    if (!categoryNames.includes(category)) {
-      console.error('❌ Category validation failed!');
-      console.error('  Looking for: "' + category + '"');
-      console.error('  Valid options:', categoryNames);
-      showStatus(`❌ Invalid category. Must be one of: ${categoryNames.join(', ')}`, 'error');
-      return;
-    }
-    
-    console.log('✅ Category validation passed:', category);
     
     const taskData = {
       name: taskNameInput.value.trim(),

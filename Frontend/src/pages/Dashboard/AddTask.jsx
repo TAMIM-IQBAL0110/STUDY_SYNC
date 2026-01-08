@@ -43,7 +43,7 @@ const AddTask = () => {
         // Set first category as default
         setFormData(prev => ({
           ...prev,
-          category: response.data.categories[0]._id
+          category: response.data.categories[0].name
         }))
       }
     } catch (error) {
@@ -176,7 +176,7 @@ const AddTask = () => {
                   <option>No categories available</option>
                 ) : (
                   categories.map(cat => (
-                    <option key={cat._id} value={cat._id}>
+                    <option key={cat._id} value={cat.name}>
                       {cat.name}
                     </option>
                   ))

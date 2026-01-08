@@ -32,19 +32,48 @@ export const addTask = async(req,res)=>{
             message: "Invalid startTime"
         })
         
-        // Convert category name (string) to ObjectId
+        // Handle category - can be ObjectId or name string
         let categoryId = category;
+        
         if (typeof category === 'string') {
+            // If it looks like a MongoDB ObjectId (24 hex chars), validate it exists
+            if (category.match(/^[0-9a-fA-F]{24}$/)) {
+                // It's an ObjectId - verify it exists
+                const categoryDoc = await Category.findOne({ 
+                    _id: category,
+                    user: userId
+                });
+                if (!categoryDoc) {
+                    return res.status(400).json({
+                        message: `Category not found`
+                    });
+                }
+                categoryId = category;
+            } else {
+                // It's a category name - look it up by name
+                const categoryDoc = await Category.findOne({ 
+                    user: userId, 
+                    name: category.trim()
+                });
+                if (!categoryDoc) {
+                    return res.status(400).json({
+                        message: `Category "${category}" not found for user`
+                    });
+                }
+                categoryId = categoryDoc._id;
+            }
+        } else {
+            // category is already an ObjectId
             const categoryDoc = await Category.findOne({ 
-                user: userId, 
-                name: category.trim()
+                _id: category,
+                user: userId
             });
             if (!categoryDoc) {
                 return res.status(400).json({
-                    message: `Category "${category}" not found for user`
+                    message: `Category not found`
                 });
             }
-            categoryId = categoryDoc._id;
+            categoryId = category;
         }
         
         const task = await Task.create({
@@ -84,20 +113,46 @@ export const updateTask = async(req,res)=>{
         let plainTime = startTime;
         if (name !== undefined) task.taskName = name;
         
-        // Handle category - convert name to ObjectId if needed
+        // Handle category - can be ObjectId or name string
         if (category !== undefined) {
             if (typeof category === 'string') {
+                // If it looks like a MongoDB ObjectId (24 hex chars), validate it exists
+                if (category.match(/^[0-9a-fA-F]{24}$/)) {
+                    // It's an ObjectId - verify it exists
+                    const categoryDoc = await Category.findOne({ 
+                        _id: category,
+                        user: userId
+                    });
+                    if (!categoryDoc) {
+                        return res.status(400).json({
+                            message: `Category not found`
+                        });
+                    }
+                    task.category = category;
+                } else {
+                    // It's a category name - look it up by name
+                    const categoryDoc = await Category.findOne({ 
+                        user: userId, 
+                        name: category.trim()
+                    });
+                    if (!categoryDoc) {
+                        return res.status(400).json({
+                            message: `Category "${category}" not found for user`
+                        });
+                    }
+                    task.category = categoryDoc._id;
+                }
+            } else {
+                // category is already an ObjectId
                 const categoryDoc = await Category.findOne({ 
-                    user: userId, 
-                    name: category.trim()
+                    _id: category,
+                    user: userId
                 });
                 if (!categoryDoc) {
                     return res.status(400).json({
-                        message: `Category "${category}" not found for user`
+                        message: `Category not found`
                     });
                 }
-                task.category = categoryDoc._id;
-            } else {
                 task.category = category;
             }
         }
