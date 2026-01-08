@@ -21,45 +21,79 @@ const Home = () => {
     setLoading(true)
 
     try {
-      const response = await axiosInstance.get(API_PATH.DASHBOARD.GET_DATA)
-      if (response.data.success) {
-        // Get all tasks and filter for today on the frontend (uses local timezone)
-        const allTasks = response.data.data;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        // Filter tasks for today based on local timezone
-        const todayPending = allTasks.pendingTasksToday ? allTasks.pendingTasksToday.filter(task => {
-          const taskDate = new Date(task.date);
-          taskDate.setHours(0, 0, 0, 0);
-          return taskDate.getTime() === today.getTime();
-        }) : [];
-        
-        const todayCompleted = allTasks.completedTasksToday ? allTasks.completedTasksToday.filter(task => {
-          const taskDate = new Date(task.date);
-          taskDate.setHours(0, 0, 0, 0);
-          return taskDate.getTime() === today.getTime();
-        }) : [];
-        
-        setData({
-          ...allTasks,
-          pendingTasksToday: todayPending,
-          completedTasksToday: todayCompleted
-        })
-        setDashboardStats({
-          totalTasks: response.data.totalTasks,
-          completedTasks: response.data.completedTasks,
-          pendingTasks: response.data.pendingTasks,
-          today: {
-            pending: todayPending.length,
-            completed: todayCompleted.length
-          },
-          overdue: response.data.overdue,
-          last30DaysPerformance: response.data.last30DaysPerformance
-        })
-      } else {
-        setError(response.data.message || "Failed to fetch data")
+      const response = await axiosInstance.get(API_PATH.TASK.GET_ALL_TASK)
+      const allTasks = response.data.tasks || []
+      
+      // Filter tasks on frontend using local timezone (like TaskPage does)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      const pendingTasksToday = []
+      const completedTasksToday = []
+      const overdueTasks = []
+      const completedTasks = []
+      const pendingTasks = []
+      
+      // Prepare last 30 days map for performance data
+      const last30DaysMap = new Map()
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(today)
+        date.setDate(date.getDate() - i)
+        const dateKey = date.toISOString().split('T')[0]
+        last30DaysMap.set(dateKey, { pending: 0, completed: 0 })
       }
+      
+      allTasks.forEach(task => {
+        const taskDate = new Date(task.date)
+        taskDate.setHours(0, 0, 0, 0)
+        const dateKey = taskDate.toISOString().split('T')[0]
+        
+        if (task.status === 'Pending') {
+          pendingTasks.push(task)
+          if (taskDate.getTime() === today.getTime()) {
+            pendingTasksToday.push(task)
+          } else if (taskDate.getTime() < today.getTime()) {
+            overdueTasks.push(task)
+          }
+        } else {
+          completedTasks.push(task)
+          if (taskDate.getTime() === today.getTime()) {
+            completedTasksToday.push(task)
+          }
+        }
+        
+        // Track for last 30 days performance
+        if (last30DaysMap.has(dateKey)) {
+          const dayEntry = last30DaysMap.get(dateKey)
+          if (task.status === 'Pending') dayEntry.pending += 1
+          else dayEntry.completed += 1
+        }
+      })
+      
+      const last30DaysPerformance = Array.from(last30DaysMap, ([date, counts]) => ({
+        date,
+        ...counts,
+      }))
+      
+      setData({
+        pendingTasksToday,
+        completedTasksToday,
+        overdueTasks
+      })
+      
+      setDashboardStats({
+        totalTasks: allTasks.length,
+        completedTasks: completedTasks.length,
+        pendingTasks: pendingTasks.length,
+        today: {
+          pending: pendingTasksToday.length,
+          completed: completedTasksToday.length
+        },
+        overdue: {
+          all: overdueTasks.length
+        },
+        last30DaysPerformance
+      })
     } catch (err) {
       console.error("Error fetching dashboard data:", err)
       setError("An error occurred while fetching data.")
