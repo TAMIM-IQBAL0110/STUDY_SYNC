@@ -14,9 +14,11 @@ const AddTask = () => {
   const today = new Date().toISOString().split('T')[0]
 
   const [loading, setLoading] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [fetchingCategories, setFetchingCategories] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Others',
+    category: '',
     date: passedDate || today, // Use the passed date immediately
     startTime: '09:00',
     description: '',
@@ -26,6 +28,31 @@ const AddTask = () => {
   // Determine where to go back to
   // If we have state from calendar, go back to calendar, otherwise go to home
   const goBackPath = passedDate ? '/dashboard/calendar' : '/dashboard'
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      setFetchingCategories(true)
+      const response = await axiosInstance.get(API_PATH.CATEGORY.GET_ALL)
+      if (response.data.categories && response.data.categories.length > 0) {
+        setCategories(response.data.categories)
+        // Set first category as default
+        setFormData(prev => ({
+          ...prev,
+          category: response.data.categories[0]._id
+        }))
+      }
+    } catch (error) {
+      toast.error('Failed to load categories')
+      console.error(error)
+    } finally {
+      setFetchingCategories(false)
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -129,26 +156,33 @@ const AddTask = () => {
             <label className="block font-semibold mb-2" style={{ color: 'oklch(0.15 0.06 245)' }}>
               Category
             </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all"
-              style={{
-                borderColor: 'oklch(0.85 0.03 245)',
-                color: 'oklch(0.15 0.06 245)',
-                backgroundColor: 'oklch(0.96 0.03 245)'
-              }}
-            >
-              <option>Class</option>
-              <option>Exam</option>
-              <option>Assignment</option>
-              <option>Exam Prep</option>
-              <option>Project</option>
-              <option>Lab</option>
-              <option>extraCurriculam</option>
-              <option>Others</option>
-            </select>
+            {fetchingCategories ? (
+              <div className="w-full px-4 py-3 rounded-lg" style={{ backgroundColor: 'oklch(0.96 0.03 245)', color: 'oklch(0.4 0.06 245)' }}>
+                Loading categories...
+              </div>
+            ) : (
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all"
+                style={{
+                  borderColor: 'oklch(0.85 0.03 245)',
+                  color: 'oklch(0.15 0.06 245)',
+                  backgroundColor: 'oklch(0.96 0.03 245)'
+                }}
+              >
+                {categories.length === 0 ? (
+                  <option>No categories available</option>
+                ) : (
+                  categories.map(cat => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))
+                )}
+              </select>
+            )}
           </div>
 
           {/* Date */}

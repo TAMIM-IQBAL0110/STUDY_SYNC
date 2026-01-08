@@ -15,6 +15,14 @@ export const API_PATH = {
         UPDATE_TASK:(taskId)=>`/api/v1/task/update/${taskId}`,
         DELETE_TASK:(taskId)=>`/api/v1/task/${taskId}`,
     },
+    CATEGORY:{
+        GET_ALL:"/api/v1/category",
+        ADD:"/api/v1/category",
+        UPDATE:(categoryId)=>`/api/v1/category/${categoryId}`,
+        DELETE:(categoryId)=>`/api/v1/category/${categoryId}`,
+        GET_DEFAULT:"/api/v1/category/default",
+        INITIALIZE:"/api/v1/category/initialize",
+    },
     DASHBOARD:{
         GET_DATA:"/api/v1/dashboard/",
     }

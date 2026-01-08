@@ -10,9 +10,10 @@ const EditTask = () => {
   const { taskId } = useParams()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
+  const [categories, setCategories] = useState([])
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Others',
+    category: '',
     date: new Date().toISOString().split('T')[0],
     startTime: '09:00',
     description: '',
@@ -38,8 +39,15 @@ const EditTask = () => {
   }
 
   useEffect(() => {
-    const fetchTask = async () => {
+    const fetchCategoriesAndTask = async () => {
       try {
+        // Fetch categories first
+        const categoriesResponse = await axiosInstance.get(API_PATH.CATEGORY.GET_ALL)
+        if (categoriesResponse.data.categories) {
+          setCategories(categoriesResponse.data.categories)
+        }
+
+        // Fetch task details
         const response = await axiosInstance.get(`${API_PATH.TASK.GET_ALL_TASK}`)
         const tasks = response.data.tasks
         const task = tasks.find(t => t._id === taskId)
@@ -52,7 +60,7 @@ const EditTask = () => {
 
           setFormData({
             name: task.taskName || '',
-            category: task.category || 'Others',
+            category: task.category || '',
             date: task.date ? new Date(task.date).toISOString().split('T')[0] : '',
             startTime: timeString,
             description: task.description || '',
@@ -64,13 +72,13 @@ const EditTask = () => {
           navigate(-1)
         }
       } catch (err) {
-        toast.error('Failed to fetch task')
+        toast.error('Failed to fetch data')
         navigate(-1)
       } finally {
         setFetching(false)
       }
     }
-    fetchTask()
+    fetchCategoriesAndTask()
   }, [taskId, navigate])
 
   const handleChange = (e) => {
@@ -169,8 +177,12 @@ const EditTask = () => {
                 className="w-full p-3 rounded-lg cursor-pointer appearance-none"
                 style={inputBaseStyle}
               >
-                <option>Class</option><option>Exam</option><option>Assignment</option>
-                <option>Project</option><option>Lab</option><option>Others</option>
+                <option value="">Select Category</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Status */}

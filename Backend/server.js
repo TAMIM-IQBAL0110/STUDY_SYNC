@@ -4,6 +4,7 @@ import connectDB from './config/db.js';
 import authRoute from './routes/authRoute.js';
 import dashboardRoute from './routes/dashboardRoute.js'
 import taskRoutes from './routes/taskRoutes.js'
+import categoryRoute from './routes/categoryRoute.js'
 import cors from 'cors';
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -65,6 +66,7 @@ connectDB();
 app.use("/api/v1/auth",authRoute);
 app.use("/api/v1/dashboard",dashboardRoute);
 app.use("/api/v1/task",taskRoutes);
+app.use("/api/v1/category",categoryRoute);
 
 // 404 handler
 app.use((req, res) => {
