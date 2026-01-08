@@ -26,9 +26,8 @@ export const dashboardData = async(req,res)=>{
         // performance of last 30 days
         const last30DaysMap = new Map();
         for (let i = 29; i >= 0; i--) {
-            const date = daysAgo(i);
-            const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD
-            last30DaysMap.set(dateKey, { pending: 0, completed: 0 });
+            const dateStr = daysAgo(i); // Now returns YYYY-MM-DD string
+            last30DaysMap.set(dateStr, { pending: 0, completed: 0 });
         }
 
         
