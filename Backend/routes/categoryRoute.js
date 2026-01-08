@@ -11,7 +11,7 @@ import {
 
 const router = express.Router();
 
-// Public routes
+// Public routes (no authentication required)
 router.get("/default", getDefaultCategories);
 
 // Protected routes (require authentication)

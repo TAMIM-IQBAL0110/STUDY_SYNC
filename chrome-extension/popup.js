@@ -138,6 +138,11 @@ async function fetchCategoriesWithToken(token) {
       console.log('⚠️ Failed to fetch categories, status:', response.status);
       const errorText = await response.text();
       console.log('Error:', errorText);
+      
+      // Fallback to default categories if token is invalid
+      console.log('📋 Falling back to default categories');
+      populateCategoryDropdown(DEFAULT_CATEGORIES);
+    }
       populateCategoryDropdown(DEFAULT_CATEGORIES);
       showStatus('Failed to load categories', 'error');
     }
