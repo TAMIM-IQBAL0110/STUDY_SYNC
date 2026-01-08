@@ -1,5 +1,15 @@
 import Task from "../models/taskSchema.js";
-import { minutesToTime } from "../utilities/minutesToTime.js"; 
+import { minutesToTime } from "../utilities/minutesToTime.js";
+
+// Helper function to format Date to YYYY-MM-DD string (accounting for local timezone)
+const formatDateToYYYYMMDD = (dateObj) => {
+  // Create new date to avoid timezone issues
+  const date = new Date(dateObj);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export const getAllTask = async (userId) => {
   try {
@@ -12,6 +22,7 @@ export const getAllTask = async (userId) => {
       const taskObj = task.toObject();
       return {
         ...taskObj,
+        date: formatDateToYYYYMMDD(taskObj.date), // Convert Date to YYYY-MM-DD string
         startTimeFormatted: minutesToTime(task.startTime),
         category: taskObj.category ? {
           _id: taskObj.category._id,
