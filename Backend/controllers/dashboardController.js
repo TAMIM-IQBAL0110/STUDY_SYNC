@@ -33,29 +33,27 @@ export const dashboardData = async(req,res)=>{
 
         
         tasks.forEach(task =>{
-            const taskDate = new Date(task.date);
-            taskDate.setHours(0, 0, 0, 0);
-            const dateKey = taskDate.toISOString().split("T")[0];
+            const taskDateStr = task.date; // Already in YYYY-MM-DD format
             
             if(task.status === "Pending"){
                 pendingTask.push(task);
-                if(taskDate.getTime() === today.getTime()){
+                if(taskDateStr === today){
                     pendingTasksToday.push(task);
                 }
-                else if(taskDate.getTime() < today.getTime()){
+                else if(taskDateStr < today){
                     // All pending tasks with date before today are overdue
                     overdueTasks.push(task);
                 } 
             }
             else {
                 completedTask.push(task);
-                if(taskDate.getTime() === today.getTime()){
+                if(taskDateStr === today){
                     completedTasksToday.push(task);
                 }
             }
 
-            if (last30DaysMap.has(dateKey)) {
-                const dayEntry = last30DaysMap.get(dateKey);
+            if (last30DaysMap.has(taskDateStr)) {
+                const dayEntry = last30DaysMap.get(taskDateStr);
                 if (task.status === "Pending") dayEntry.pending += 1; 
                 else dayEntry.completed += 1;
             }
