@@ -15,7 +15,6 @@ const Home = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [dashboardStats, setDashboardStats] = useState(null)
-  const [editingTaskId, setEditingTaskId] = useState(null)
 
   const fetchData = async () => {
     if (loading) return
@@ -147,41 +146,55 @@ const Home = () => {
       </div>
 
       {/* Completion Summary */}
-      <CompletionSummary 
-        stats={{
-          totalTasks: dashboardStats?.today?.pending + dashboardStats?.today?.completed || 0,
-          completedTasks: dashboardStats?.today?.completed || 0,
-        }}
-        label="Today's Completion"
-        daysLabel=""
-      />
-      
-      {/* Performance Graph last 30Days*/}
-      <div className="mt-8 rounded-2xl shadow-lg" style={{ backgroundColor: 'oklch(1 0.03 245)' }}>
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 rounded-lg text-white" style={{ backgroundColor: 'oklch(0.4 0.1 245)' }}>
-              <FiTrendingUp size={20} />
-            </div>
-            <h3 className="text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>
-              30-Day Performance Trend
-            </h3>
-          </div>
-          <div className="h-96 w-full">
-            {dashboardStats?.last30DaysPerformance && dashboardStats.last30DaysPerformance.length > 0 ? (
-              <PerformanceGraph 
-                Performance={dashboardStats.last30DaysPerformance}
-                nDays={30} 
-                className="w-full h-full"
-              />
-            ) : (
-              <div className="rounded-xl p-6 flex items-center justify-center h-full" style={{ backgroundColor: 'oklch(0.96 0.03 245)' }}>
-                <p style={{ color: 'oklch(0.4 0.06 245)' }} className="italic">No performance data available</p>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="mb-8">
+        <CompletionSummary 
+          stats={{
+            totalTasks: dashboardStats?.today?.pending + dashboardStats?.today?.completed || 0,
+            completedTasks: dashboardStats?.today?.completed || 0,
+          }}
+          label="Today's Completion"
+          daysLabel=""
+        />
       </div>
+      
+      {/* Middle Row: Performance Graph (Full Width Card) */}
+          <div className="mt-8 rounded-2xl shadow-lg" style={{ backgroundColor: 'oklch(1 0.03 245)' }}>
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg text-white" style={{ backgroundColor: 'oklch(0.4 0.1 245)' }}>
+                    <FiTrendingUp size={20} /> 
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold" style={{ color: 'oklch(0.15 0.06 245)' }}>
+                     Performance of last 30 days
+                  </h3>
+                </div>
+                {/* Legend */}
+                <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm p-2 sm:p-3 rounded-lg flex-wrap" style={{ backgroundColor: 'white' }}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 160)' }}></div>
+                    <span style={{ color: 'oklch(0.4 0.06 245)' }}>Completed</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded" style={{ backgroundColor: 'oklch(0.5 0.06 100)' }}></div>
+                    <span style={{ color: 'oklch(0.4 0.06 245)' }}>Pending</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-80 sm:h-96 md:h-[28rem] w-full">
+                {dashboardStats?.last30DaysPerformance && dashboardStats.last30DaysPerformance.length > 0 ? (
+                  <PerformanceGraph 
+                    Performance={dashboardStats.last30DaysPerformance} 
+                    nDays={30} 
+                  />
+                ) : (
+                  <div className="rounded-xl p-6 flex items-center justify-center h-full" style={{ backgroundColor: 'oklch(0.96 0.03 245)' }}>
+                    <p style={{ color: 'oklch(0.4 0.06 245)' }} className="italic">No performance data available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
       {/* Loading State */}
       {loading && (

@@ -71,7 +71,7 @@ self.addEventListener('fetch', (event) => {
         fetch(request).then((freshResponse) => {
           if (freshResponse.ok) {
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, freshResponse);
+              cache.put(request, freshResponse.clone());
             });
           }
         });

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DailyBarChart = ({ data, title }) => {
+const DailyBarChart = ({ data }) => {
   const chartData = data && data.length > 0 ? data.slice(-14) : [];
   
   if (!chartData || chartData.length === 0) {
@@ -27,7 +27,6 @@ const DailyBarChart = ({ data, title }) => {
   const chartHeight = 380;
   const chartPadding = 50;
   const chartWidth = 1400;
-  const bottomPadding = 80;
 
   return (
     <div className="w-full h-full flex flex-col relative">

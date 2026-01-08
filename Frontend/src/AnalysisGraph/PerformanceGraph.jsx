@@ -13,19 +13,21 @@ const PerformanceGraph = ({ Performance, nDays, className }) => {
   }
 
   return (
-    <div className={`w-full h-full overflow-x-auto overflow-y-hidden relative ${className}`}>
-      {(() => {
-        // Calculate dimensions based on data length - responsive for mobile
-        const dataLength = filteredData.length;
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-        const minWidth = isMobile ? 300 : 1050;
-        const pointSpacing = isMobile ? 20 : 35; // Smaller spacing on mobile
-        const viewBoxWidth = Math.max(minWidth, 60 + dataLength * pointSpacing + 50);
-        const viewBoxHeight = isMobile ? 310 : 420; // Increased to show date labels
-        
-        return (
-          <svg width={viewBoxWidth} height="100%" viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} preserveAspectRatio="none" style={{ minHeight: viewBoxHeight, display: 'block' }}>
-            {(() => {
+    <div className={`w-full ${className}`}>
+      <div className="w-full h-full overflow-x-auto overflow-y-hidden relative">
+        {(() => {
+          // Calculate dimensions based on data length - responsive for mobile
+          const dataLength = filteredData.length;
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+          const minWidth = isMobile ? 300 : 1050;
+          const pointSpacing = isMobile ? 20 : 35; // Smaller spacing on mobile
+          const viewBoxWidth = Math.max(minWidth, 60 + dataLength * pointSpacing + 50);
+          const viewBoxHeight = isMobile ? 310 : 420; // Increased to show date labels
+          
+          return (
+            <>
+              <svg width={viewBoxWidth} height="100%" viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} preserveAspectRatio="none" style={{ minHeight: viewBoxHeight, display: 'block' }}>
+                {(() => {
               // Calculate max values first for Y-axis scaling
               const maxCompleted = Math.max(...filteredData.map(d => d.completed || 0), 1)
               const maxPending = Math.max(...filteredData.map(d => d.pending || 0), 1)
@@ -148,6 +150,7 @@ const PerformanceGraph = ({ Performance, nDays, className }) => {
                   d={completedPath + ` L ${endX} ${chartBottom} L 60 ${chartBottom} Z`}
                   fill="url(#completedGradient)"
                 />
+
                 <path
                   d={completedPath}
                   stroke="oklch(0.5 0.06 160)"
@@ -231,10 +234,13 @@ const PerformanceGraph = ({ Performance, nDays, className }) => {
             )
           })()}
         </svg>
-        );
-      })()}
+            </>
+          );
+        })()}
+      </div>
     </div>
   );
 };
 
 export default PerformanceGraph;
+
