@@ -23,12 +23,37 @@ const Home = () => {
     try {
       const response = await axiosInstance.get(API_PATH.DASHBOARD.GET_DATA)
       if (response.data.success) {
-        setData(response.data.data)
+        // Get all tasks and filter for today on the frontend (uses local timezone)
+        const allTasks = response.data.data;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Filter tasks for today based on local timezone
+        const todayPending = allTasks.pendingTasksToday ? allTasks.pendingTasksToday.filter(task => {
+          const taskDate = new Date(task.date);
+          taskDate.setHours(0, 0, 0, 0);
+          return taskDate.getTime() === today.getTime();
+        }) : [];
+        
+        const todayCompleted = allTasks.completedTasksToday ? allTasks.completedTasksToday.filter(task => {
+          const taskDate = new Date(task.date);
+          taskDate.setHours(0, 0, 0, 0);
+          return taskDate.getTime() === today.getTime();
+        }) : [];
+        
+        setData({
+          ...allTasks,
+          pendingTasksToday: todayPending,
+          completedTasksToday: todayCompleted
+        })
         setDashboardStats({
           totalTasks: response.data.totalTasks,
           completedTasks: response.data.completedTasks,
           pendingTasks: response.data.pendingTasks,
-          today: response.data.today,
+          today: {
+            pending: todayPending.length,
+            completed: todayCompleted.length
+          },
           overdue: response.data.overdue,
           last30DaysPerformance: response.data.last30DaysPerformance
         })
