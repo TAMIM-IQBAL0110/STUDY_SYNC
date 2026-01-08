@@ -1,6 +1,6 @@
 import React from 'react'
 
-const taskNumberCard = ({ taskCount, Heading,Icon,Footer}) => {
+const taskNumberCard = ({ taskCount, Heading,Footer,Icon, headingColor ='oklch(0.4 0.06 245)' }) => {
     return (
         <div
             className="rounded-xl p-6 shadow-lg flex flex-col justify-between"
@@ -8,7 +8,7 @@ const taskNumberCard = ({ taskCount, Heading,Icon,Footer}) => {
         >
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <h3 style={{ color: 'oklch(0.4 0.06 245)' }} className="text-sm font-semibold">
+                    <h3 style={{ color: headingColor }} className="text-sm font-semibold">
                         {Heading}
                     </h3>
                     <div

@@ -102,6 +102,7 @@ const Home = () => {
           Heading="Today Pending Tasks"
           Footer="Tasks pending"
           Icon={FiClock}
+          headingColor='oklch(0.6 0.25 25)'
         />
 
         {/* Total Tasks Card */}
@@ -118,6 +119,7 @@ const Home = () => {
           Heading="Overdue Tasks All Time"
           Footer="Tasks overdue"
           Icon={FiAlertCircle}
+          headingColor='oklch(0.6 0.25 25)'
         />
       </div>
       {/* Main Content Grid */}
