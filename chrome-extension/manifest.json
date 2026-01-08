@@ -9,11 +9,11 @@
   ],
   "host_permissions": [
     "https://study-sync-mv99.onrender.com/*",
-    "https://studysynch.netlify.app/*"
+    "https://studysy.netlify.app/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://studysynch.netlify.app/*"],
+      "matches": ["https://studysy.netlify.app/*"],
       "js": ["content.js"],
       "run_at": "document_start"
     }
