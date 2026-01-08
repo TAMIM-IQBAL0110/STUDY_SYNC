@@ -28,6 +28,7 @@ app.use(
             // Allow Chrome extension requests
             // Allow localhost for development
             // Allow configured CLIENT_URL
+            console.log(`🔍 CORS request from origin: ${origin || 'no-origin'}`);
             if (
                 !origin || 
                 (origin && origin.startsWith('chrome-extension://')) ||
@@ -36,6 +37,7 @@ app.use(
                 allowedOrigins.includes('*') || 
                 (origin && allowedOrigins.includes(origin))
             ) {
+                console.log(`✅ CORS allowed`);
                 callback(null, true);
             } else {
                 console.warn(`❌ CORS blocked origin: ${origin}`);
