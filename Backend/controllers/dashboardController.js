@@ -11,9 +11,11 @@ export const dashboardData = async(req,res)=>{
         const tasks = await getAllTask(userId);
 
 
-        const today = daysAgo(0);
+        const today = daysAgo(0); // Returns YYYY-MM-DD string
         const yesterday = daysAgo(1);
         const last30Days = daysAgo(30);
+        
+        console.log(`📅 Dashboard: today=${today}, userId=${userId}`);
 
         // Prepare dashboard categories
         const pendingTasksToday = [];
@@ -32,7 +34,12 @@ export const dashboardData = async(req,res)=>{
 
         
         tasks.forEach(task =>{
-            const taskDateStr = task.date; // Already in YYYY-MM-DD format
+            // Sanitize task date - ensure it's in YYYY-MM-DD format
+            const taskDateStr = String(task.date).trim().substring(0, 10); // Take first 10 chars: YYYY-MM-DD
+            
+            if (taskDateStr === today) {
+                console.log(`✅ Match: taskDate=${taskDateStr} === today=${today}`);
+            }
             
             if(task.status === "Pending"){
                 pendingTask.push(task);
