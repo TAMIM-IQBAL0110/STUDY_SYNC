@@ -1,7 +1,7 @@
 [build]
 base = "Frontend"
 command = "npm run build"
-publish = "Frontend/dist"
+publish = "dist"
 
 [build.environment]
 VITE_BASE_URL = "https://study-sync-mv99.onrender.com"
