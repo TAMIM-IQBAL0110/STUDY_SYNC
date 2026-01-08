@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
+import { protect } from "../middlewares/authMiddleware.js";
 import {
     getAllCategories,
     addCategory,
@@ -15,13 +15,13 @@ const router = express.Router();
 router.get("/default", getDefaultCategories);
 
 // Protected routes (require authentication)
-router.get("/", authMiddleware, getAllCategories);
-router.post("/", authMiddleware, addCategory);
-router.put("/:categoryId", authMiddleware, updateCategory);
-router.delete("/:categoryId", authMiddleware, deleteCategory);
+router.get("/", protect, getAllCategories);
+router.post("/", protect, addCategory);
+router.put("/:categoryId", protect, updateCategory);
+router.delete("/:categoryId", protect, deleteCategory);
 
 // Initialize default categories for a user
-router.post("/initialize", authMiddleware, async (req, res) => {
+router.post("/initialize", protect, async (req, res) => {
     try {
         await initializeDefaultCategories(req.user.id);
         res.status(200).json({
