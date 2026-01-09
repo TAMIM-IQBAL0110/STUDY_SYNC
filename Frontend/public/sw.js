@@ -7,10 +7,8 @@ const urlsToCache = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching essential files');
       return cache.addAll(urlsToCache);
     })
   );
@@ -19,13 +17,11 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -44,19 +40,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API requests - let them go through network
+  // Skip API requests - network first with cache fallback
   if (request.url.includes('/api/')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response.ok) {
-            const cache = caches.open(CACHE_NAME);
-            cache.then((c) => c.put(request, response.clone()));
+          // Clone the response before using it
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
           }
           return response;
         })
         .catch(() => {
-          // Return cached version if available
+          // Return cached version if available, otherwise fail
           return caches.match(request);
         })
     );

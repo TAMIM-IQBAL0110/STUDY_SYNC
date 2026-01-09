@@ -65,18 +65,15 @@ function loadAuthToken() {
   // First try chrome.storage.sync
   chrome.storage.sync.get([AUTH_TOKEN_KEY], (result) => {
     if (result[AUTH_TOKEN_KEY]) {
-      console.log('✅ Token found in sync storage');
       return;
     }
     
     // If not found, try chrome.storage.local
     chrome.storage.local.get([AUTH_TOKEN_KEY], (localResult) => {
       if (localResult[AUTH_TOKEN_KEY]) {
-        console.log('✅ Token found in local storage');
         return;
       }
       // If still not found, show warning
-      console.log('⚠️ No token found, user needs to log in');
       showStatus('⚠️ Please log in to STUDY_SYNC first.', 'warning');
     });
   });
@@ -87,10 +84,8 @@ function loadCategories() {
   // First try to get token from content script (which reads from website localStorage)
   chrome.tabs.query({ url: '*://studysy.netlify.app/*' }, (tabs) => {
     if (tabs.length > 0) {
-      console.log('🔄 Requesting token from content script...');
       chrome.tabs.sendMessage(tabs[0].id, { action: 'getToken' }, (response) => {
         if (response && response.token) {
-          console.log('✅ Token received from content script');
           fetchCategoriesWithToken(response.token);
           return;
         }
@@ -118,13 +113,11 @@ function getTokenFromStorage() {
     }
     
     if (!token) {
-      console.log('⚠️ No token, using default categories');
       populateCategoryDropdown(DEFAULT_CATEGORIES);
       return;
     }
     
     // Fetch categories directly
-    console.log('🔄 Fetching categories with token...');
     fetchCategoriesWithToken(token);
   });
 }
@@ -132,8 +125,6 @@ function getTokenFromStorage() {
 // Fetch categories with token
 async function fetchCategoriesWithToken(token) {
   try {
-    console.log('🔄 Fetching categories...');
-    
     const response = await fetch(`${API_URL}/api/v1/category`, {
       method: 'GET',
       headers: {
@@ -143,30 +134,20 @@ async function fetchCategoriesWithToken(token) {
       credentials: 'include'
     });
     
-    console.log('📊 Response status:', response.status);
-    
     if (response.ok) {
       const data = await response.json();
       const allCategories = data.categories || [];
       
       if (allCategories && allCategories.length > 0) {
-        console.log('✅ Categories loaded:', allCategories.length);
         populateCategoryDropdown(allCategories);
       } else {
-        console.log('⚠️ No categories found, using defaults');
         populateCategoryDropdown(DEFAULT_CATEGORIES);
       }
     } else {
-      console.log('⚠️ Failed to fetch categories, status:', response.status);
-      const errorText = await response.text();
-      console.log('Error:', errorText);
-      
       // Fallback to default categories if token is invalid
-      console.log('📋 Falling back to default categories');
       populateCategoryDropdown(DEFAULT_CATEGORIES);
     }
   } catch (error) {
-    console.error('❌ Error fetching categories:', error);
     populateCategoryDropdown(DEFAULT_CATEGORIES);
     showStatus('Error loading categories', 'error');
   }
@@ -177,13 +158,9 @@ function populateCategoryDropdown(categories) {
   const categorySelect = document.getElementById('category');
   if (!categorySelect) return;
   
-  console.log('🎨 Populating dropdown, received:', categories);
-  console.log('🎨 Type of categories:', typeof categories);
-  
   categorySelect.innerHTML = '';
   
   if (!categories || categories.length === 0) {
-    console.log('⚠️ No categories provided');
     const option = document.createElement('option');
     option.textContent = 'No categories available';
     categorySelect.appendChild(option);
@@ -204,13 +181,10 @@ function populateCategoryDropdown(categories) {
     }
   });
   
-  console.log('📋 Final category names to display:', categoryNames);
-  
   // Remove duplicates
   categoryNames = [...new Set(categoryNames)];
   
   if (categoryNames.length === 0) {
-    console.log('⚠️ No valid category names extracted');
     return;
   }
   
@@ -220,7 +194,6 @@ function populateCategoryDropdown(categories) {
     option.value = name;  // IMPORTANT: Use name as value, NOT ObjectId
     option.textContent = name;
     categorySelect.appendChild(option);
-    console.log('➕ Added option:', name);
   });
   
   // Cache just the category names for validation
@@ -233,8 +206,6 @@ function populateCategoryDropdown(categories) {
   if (othersOption) {
     categorySelect.value = 'Others';
   }
-  
-  console.log('✅ Dropdown populated with', categoryNames.length, 'categories');
 }
 
 // Handle form submission
@@ -247,22 +218,17 @@ openAppBtn.addEventListener('click', () => {
 // Handle form submission
 taskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  console.log('📝 Form submitted, validating...');
   
   if (!taskNameInput.value.trim()) {
     showStatus('❌ Please enter a task name', 'error');
     return;
   }
-  
-  console.log('✅ Task name valid:', taskNameInput.value);
 
   // Try to get token from content script first (fresh from frontend login)
   chrome.tabs.query({ url: '*://studysy.netlify.app/*' }, (tabs) => {
     if (tabs.length > 0) {
-      console.log('🔄 Requesting token from content script...');
       chrome.tabs.sendMessage(tabs[0].id, { action: 'getToken' }, (response) => {
         if (response && response.token) {
-          console.log('✅ Token received from content script');
           submitTask(response.token);
           return;
         }
@@ -292,40 +258,28 @@ function getStoredTokenAndSubmit() {
     
     if (!token) {
       showStatus('❌ Please log in to STUDY_SYNC first', 'error');
-      console.log('❌ No token found in any storage');
       return;
     }
     
-    console.log('✅ Token found, creating task...');
     submitTask(token);
-  });
-}
-
-function submitTask(token) {
+    
   const category = categoryInput.value.trim() || 'Others';
   console.log('📌 Selected category value:', JSON.stringify(category));
+    
     
     // Get cached category names for validation
     chrome.storage.local.get(['studySync_categoryNames'], (result) => {
       const cachedNames = result['studySync_categoryNames'] || [];
       
-      console.log('📋 Available category names from cache:', cachedNames);
-      
       if (cachedNames.length === 0) {
-        console.error('❌ No categories available');
         showStatus('❌ No categories available. Please refresh.', 'error');
         return;
       }
       
       if (!cachedNames.includes(category)) {
-        console.error('❌ Category validation failed!');
-        console.error('  Selected: "' + category + '"');
-        console.error('  Valid options:', cachedNames);
         showStatus(`❌ Invalid category. Select from: ${cachedNames.join(', ')}`, 'error');
         return;
       }
-      
-      console.log('✅ Category validation passed:', category);
       
       // Prepare task data matching backend schema
       // Convert time input to minutes from midnight
@@ -349,11 +303,7 @@ function submitTask(token) {
         startTime: startTimeMinutes, // in minutes from midnight (0-1440)
         category: category,
         reminder: false
-      };
-      
-      console.log('📤 Sending task data:', JSON.stringify(taskData, null, 2));
-
-      submitTaskToBackend(taskData, token);
+      }
     });
 }
 
@@ -381,7 +331,6 @@ async function submitTaskToBackend(taskData, token) {
       
       // Show success message
       showStatus('✅ Task created successfully!', 'success');
-      console.log('✅ Task created:', newTask);
       
       // Add to recent tasks
       addToRecentTasks(taskData);
@@ -398,7 +347,6 @@ async function submitTaskToBackend(taskData, token) {
       }, 2000);
     } else {
       const errorText = await response.text();
-      console.error('❌ Server error:', response.status, errorText);
       
       try {
         const error = JSON.parse(errorText);
@@ -411,7 +359,6 @@ async function submitTaskToBackend(taskData, token) {
       submitBtn.innerHTML = originalText;
     }
   } catch (error) {
-    console.error('❌ Network error:', error);
     showStatus(`❌ Network Error: ${error.message}`, 'error');
     
     const submitBtn = taskForm.querySelector('button[type="submit"]');
@@ -440,7 +387,6 @@ function showStatus(message, type) {
   if (type === 'success') {
     statusMessage.style.backgroundColor = 'oklch(0.8 0.05 160)';
     statusMessage.style.color = 'oklch(0.25 0.06 160)';
-    console.log('✅ ' + message);
     setTimeout(() => {
       statusMessage.style.display = 'none';
       statusMessage.textContent = '';
@@ -448,11 +394,9 @@ function showStatus(message, type) {
   } else if (type === 'error') {
     statusMessage.style.backgroundColor = 'oklch(0.9 0.04 30)';
     statusMessage.style.color = 'oklch(0.5 0.06 30)';
-    console.log('❌ ' + message);
   } else if (type === 'warning') {
     statusMessage.style.backgroundColor = 'oklch(0.9 0.04 60)';
     statusMessage.style.color = 'oklch(0.5 0.06 60)';
-    console.log('⚠️ ' + message);
   }
 }
 
@@ -512,7 +456,6 @@ function escapeHtml(text) {
 const reloginBtn = document.getElementById('reloginBtn');
 if (reloginBtn) {
   reloginBtn.addEventListener('click', () => {
-    console.log('🔐 Clearing token...');
     chrome.storage.sync.remove([AUTH_TOKEN_KEY], () => {
       chrome.storage.local.remove([AUTH_TOKEN_KEY], () => {
         showStatus('✅ Token cleared. Please refresh.', 'success');
@@ -525,7 +468,6 @@ if (reloginBtn) {
 const refreshCategoriesBtn = document.getElementById('refreshCategoriesBtn');
 if (refreshCategoriesBtn) {
   refreshCategoriesBtn.addEventListener('click', () => {
-    console.log('🔄 Manually refreshing categories...');
     refreshCategoriesBtn.style.opacity = '0.5';
     refreshCategoriesBtn.disabled = true;
     

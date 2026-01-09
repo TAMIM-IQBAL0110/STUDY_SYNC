@@ -25,24 +25,15 @@ axiosInstance.interceptors.request.use(
 // Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log(`✅ Data fetched successfully`);
     return response;
   },
   (error)=>{
     // Handle common error globally
     if(error.response){
-      console.error(`❌ Error: ${error.response.status}`);
       if(error.response.status === 401){
         // Unauthorized → redirect to login
-        console.warn("⚠️ Session expired - Redirecting to login");
         window.location.href = "/login";
       }
-    } 
-    else if (error.code === "ECONNABORTED") {
-      console.error(`❌ Request timeout`);
-    } 
-    else {
-      console.error(`❌ Network error`);
     }
 
     return Promise.reject(error);

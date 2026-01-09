@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axiosInstance from "../../utilities/axiosInstance.js";
 import { API_PATH } from "../../utilities/apiPath.js";
 import TaskShow from "../../Card/taskShow.jsx";
+import { parseDateOnlyLocal, toYYYYMMDD } from "../../utilities/dateUtils.js";
 import { 
   FiChevronLeft, 
   FiChevronRight, 
@@ -46,17 +47,16 @@ const CalendarPage = () => {
       const res = await axiosInstance.get(API_PATH.TASK.GET_ALL_TASK);
       setAllTasks(res.data.tasks || []);
     } catch (err) {
-      console.error("Error loading calendar dots:", err);
     }
   };
 
   const fetchTasksByDate = async (dateStr) => {
     setLoading(true);
     try {
-      // Filter tasks for the selected date from allTasks
+      // Filter tasks for the selected date from allTasks using local date parsing
       const filtered = allTasks.filter(t => {
-        const taskDate = new Date(t.date);
-        const taskDateStr = formatDateKey(taskDate.getFullYear(), taskDate.getMonth(), taskDate.getDate());
+        const taskDate = parseDateOnlyLocal(t.date);
+        const taskDateStr = toYYYYMMDD(taskDate);
         return taskDateStr === dateStr;
       });
       setDayTasks(filtered);

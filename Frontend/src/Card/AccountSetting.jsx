@@ -39,7 +39,6 @@ const AccountSetting = ({ userData, setUserData }) => {
       setIsChangingEmail(false)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update email')
-      console.error(err)
     }
   }
 
@@ -78,7 +77,6 @@ const AccountSetting = ({ userData, setUserData }) => {
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || 'Failed to update password'
       toast.error(errorMsg)
-      console.error('Password change error:', err)
     }
   }
 

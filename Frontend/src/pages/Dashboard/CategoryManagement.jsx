@@ -34,7 +34,6 @@ const CategoryManagement = () => {
       setCategories(response.data.categories || [])
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to fetch categories')
-      console.error(error)
     } finally {
       setFetching(false)
     }
@@ -59,7 +58,6 @@ const CategoryManagement = () => {
       toast.success('Category added successfully!')
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to add category')
-      console.error(error)
     } finally {
       setLoading(false)
     }
@@ -76,7 +74,6 @@ const CategoryManagement = () => {
       toast.success('Category deleted successfully!')
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete category')
-      console.error(error)
     }
   }
 

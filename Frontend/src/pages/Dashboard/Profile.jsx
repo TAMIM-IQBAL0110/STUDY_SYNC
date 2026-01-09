@@ -17,15 +17,9 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       const response = await axiosInstance.get(API_PATH.AUTH.GET_USER_INFO)
-      console.log('User data fetched:', response.data)
       setUserData(response.data)
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || 'Failed to fetch user data'
-      console.error('Fetch user data error:', {
-        status: err.response?.status,
-        message: errorMsg,
-        fullError: err
-      })
       toast.error(errorMsg)
     } finally {
       setLoading(false)

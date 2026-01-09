@@ -28,7 +28,6 @@ const CategoryDisplay = () => {
       await axiosInstance.post(API_PATH.CATEGORY.INITIALIZE)
       await fetchCategories()
     } catch (error) {
-      console.error('Failed to initialize default categories:', error)
       // If initialization fails, use fallback default categories
       setCategories(DEFAULT_CATEGORIES_FALLBACK)
     }
@@ -47,7 +46,6 @@ const CategoryDisplay = () => {
         setCategories(fetchedCategories)
       }
     } catch (error) {
-      console.error('Failed to fetch categories:', error)
       // On error, use fallback default categories
       setCategories(DEFAULT_CATEGORIES_FALLBACK)
       toast.warning('Using default categories (backend temporarily unavailable)')

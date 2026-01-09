@@ -1,13 +1,13 @@
 import Task from "../models/taskSchema.js";
 import { minutesToTime } from "../utilities/minutesToTime.js";
 
-// Helper function to format Date to YYYY-MM-DD string (accounting for local timezone)
+// Helper function to format Date to YYYY-MM-DD string (using UTC to preserve the intended date)
 const formatDateToYYYYMMDD = (dateObj) => {
-  // Create new date to avoid timezone issues
+  // Use UTC getters to preserve the date as stored in DB (which is in UTC)
   const date = new Date(dateObj);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
 

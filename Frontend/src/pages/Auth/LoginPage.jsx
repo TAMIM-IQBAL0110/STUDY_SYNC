@@ -49,17 +49,14 @@ const LoginPage = () => {
       })
 
       if (response.data.success) {
-        console.log("✅ Login successful");
         toast.success(response.data.message)
         localStorage.setItem('token', response.data.token)
         navigate('/dashboard')
       } else {
-        console.warn("⚠️ Login failed");
         toast.error(response.data.message)
         setError(response.data.message)
       }
     } catch (err) {
-      console.error("❌ Login error");
       const errorMsg = err.response?.data?.message || "An error occurred during login. Please try again."
       setError(errorMsg)
       toast.error(errorMsg)

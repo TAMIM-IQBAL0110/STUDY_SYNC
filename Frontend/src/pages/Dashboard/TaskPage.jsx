@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../../utilities/axiosInstance.js";
 import { API_PATH } from "../../utilities/apiPath.js";
 import TaskShow from "../../Card/taskShow.jsx";
+import { parseDateOnlyLocal } from "../../utilities/dateUtils.js";
 import { 
   FiClock, 
   FiCheckCircle, 
@@ -16,7 +17,6 @@ const TaskPage = () => {
   const navigate = useNavigate();
   const [allTasks, setAllTasks] = useState([]);
   const [nDays, setNDays] = useState(7);
-  const [loading, setLoading] = useState(false);
 
   const THEME = {
     bg: 'oklch(0.96 0.03 245)',
@@ -27,14 +27,11 @@ const TaskPage = () => {
   };
 
   const fetchTasks = async () => {
-    setLoading(true);
     try {
       const res = await axiosInstance.get(API_PATH.TASK.GET_ALL_TASK);
       setAllTasks(res.data.tasks || []);
-    } catch (err) {
+    } catch {
       toast.error("Error loading tasks");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -49,7 +46,7 @@ const TaskPage = () => {
       await axiosInstance.put(API_PATH.TASK.UPDATE_TASK(taskId), { status: newStatus });
       toast.success(`Task moved to ${newStatus.toLowerCase()}`);
       fetchTasks(); // Refresh list
-    } catch (err) {
+    } catch {
       toast.error('Failed to update task');
     }
   };
@@ -65,22 +62,39 @@ const TaskPage = () => {
     }
   };
 
-  // --- FILTER LOGIC ---
+  // --- FILTER LOGIC (FIXED with UTC-aware date parsing) ---
   const isToday = (dateStr) => {
-    const today = new Date().toDateString();
-    return new Date(dateStr).toDateString() === today;
+    if (!dateStr) return false;
+    
+    // Get today's date in UTC (to match backend's UTC storage)
+    const today = new Date();
+    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    
+    const taskDate = parseDateOnlyLocal(dateStr);
+    const taskDateUTC = taskDate ? new Date(Date.UTC(taskDate.getFullYear(), taskDate.getMonth(), taskDate.getDate())) : null;
+    
+    return taskDateUTC && taskDateUTC.getTime() === todayUTC.getTime();
   };
 
   const isWithinNDays = (dateStr, days) => {
-    const taskDate = new Date(dateStr);
-    const limitDate = new Date();
-    limitDate.setHours(0, 0, 0, 0);
-    limitDate.setDate(limitDate.getDate() - days);
-    return taskDate >= limitDate;
+    if (!dateStr) return false;
+    const taskDate = parseDateOnlyLocal(dateStr);
+    if (!taskDate) return false;
+    
+    // Compare in UTC to match backend's UTC storage
+    const today = new Date();
+    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    
+    const limitDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    limitDate.setUTCDate(limitDate.getUTCDate() - Number(days));
+    
+    const taskDateUTC = new Date(Date.UTC(taskDate.getFullYear(), taskDate.getMonth(), taskDate.getDate()));
+    
+    return taskDateUTC >= limitDate;
   };
 
   return (
-    <div style={{ backgroundColor: THEME.bg, minHeight: '100vh', padding: '16px md:30px' }}>
+    <div style={{ backgroundColor: THEME.bg, minHeight: '100vh', padding: '16px md:30px', paddingBottom: '60px' }}>
       <div className="max-w-7xl mx-auto space-y-6 md:space-y-10">
         
         {/* ROW 1: TODAY */}

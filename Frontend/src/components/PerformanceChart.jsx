@@ -20,7 +20,6 @@ const PerformanceChart = () => {
         }));
         setData(last30);
       } catch (err) {
-        console.error('Error fetching performance', err);
       }
     };
     fetchPerformance();
@@ -30,9 +29,10 @@ const PerformanceChart = () => {
     const handleResize = () => {
       if (containerRef.current) {
         const width = containerRef.current.offsetWidth;
+        const containerHeight = containerRef.current.offsetHeight || 300;
         setDimensions({
-          width: Math.max(width, 200),
-          height: 40
+          width: Math.max(width - 20, 200),
+          height: Math.max(containerHeight - 40, 150)
         });
       }
     };

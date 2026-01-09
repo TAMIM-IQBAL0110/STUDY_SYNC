@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import axiosInstance from '../../utilities/axiosInstance.js'
 import { API_PATH } from '../../utilities/apiPath.js'
+import { parseDateOnlyLocal, toYYYYMMDD } from '../../utilities/dateUtils.js'
 import toast from 'react-hot-toast'
 import { FiEdit2, FiArrowLeft } from 'react-icons/fi'
 
@@ -61,7 +62,7 @@ const EditTask = () => {
           setFormData({
             name: task.taskName || '',
             category: task.category || '',
-            date: task.date ? new Date(task.date).toISOString().split('T')[0] : '',
+            date: task.date ? toYYYYMMDD(task.date) : '',
             startTime: timeString,
             description: task.description || '',
             status: task.status || 'Pending',

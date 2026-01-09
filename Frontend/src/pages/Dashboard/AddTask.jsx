@@ -48,7 +48,6 @@ const AddTask = () => {
       }
     } catch (error) {
       toast.error('Failed to load categories')
-      console.error(error)
     } finally {
       setFetchingCategories(false)
     }
@@ -100,7 +99,6 @@ const AddTask = () => {
       navigate(goBackPath) 
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add task')
-      console.error(err)
     } finally {
       setLoading(false)
     }

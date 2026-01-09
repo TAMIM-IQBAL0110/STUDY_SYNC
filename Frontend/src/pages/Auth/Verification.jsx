@@ -56,7 +56,6 @@ const VerificationPage = () => {
         toast.error(response.data.message || 'Verification failed.');
       }
     } catch (err) {
-      console.error('Verification error:', err);
       toast.error(err.response?.data?.message || 'An error occurred during verification.');
     } finally {
       setLoading(false);

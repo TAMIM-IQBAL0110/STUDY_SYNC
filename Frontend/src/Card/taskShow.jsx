@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiCheckCircle, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { parseDateOnlyLocal } from '../utilities/dateUtils.js';
 
 const TaskShow = ({ Icon, Heading, Tasks, footer, handleCompleteTask, handleDeleteTask, navigate }) => {
   return (
@@ -34,7 +35,7 @@ const TaskShow = ({ Icon, Heading, Tasks, footer, handleCompleteTask, handleDele
                   {task.taskName}
                 </p>
                 <p style={{ color: 'oklch(0.4 0.06 245)' }} className="text-xs mt-1 font-semibold">
-                  Start Time: {new Date(task.date).toLocaleDateString('en-GB')} • {task.startTimeFormatted || 'N/A'}
+                  Start Time: {parseDateOnlyLocal(task.date).toLocaleDateString('en-GB')} • {task.startTimeFormatted || 'N/A'}
                 </p>
               </div>
 

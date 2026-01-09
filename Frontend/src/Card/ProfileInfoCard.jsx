@@ -42,7 +42,6 @@ const ProfileInfoCard = ({ userData, setUserData }) => {
       setIsEditing(false)
     } catch (err) {
       toast.error('Failed to update profile')
-      console.error(err)
     }
   }
 
@@ -98,7 +97,6 @@ const ProfileInfoCard = ({ userData, setUserData }) => {
       fileInput.value = ''
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to upload image')
-      console.error(err)
     } finally {
       setIsUploadingImage(false)
     }

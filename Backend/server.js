@@ -28,7 +28,6 @@ app.use(
             // Allow Chrome extension requests
             // Allow localhost for development
             // Allow configured CLIENT_URL
-            console.log(`🔍 CORS request from origin: ${origin || 'no-origin'}`);
             if (
                 !origin || 
                 (origin && origin.startsWith('chrome-extension://')) ||
@@ -37,10 +36,8 @@ app.use(
                 allowedOrigins.includes('*') || 
                 (origin && allowedOrigins.includes(origin))
             ) {
-                console.log(`✅ CORS allowed`);
                 callback(null, true);
             } else {
-                console.warn(`❌ CORS blocked origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
@@ -78,7 +75,6 @@ app.use((req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Server error:', err);
     res.status(500).json({ 
         message: 'Internal Server Error',
         error: process.env.NODE_ENV === 'production' ? 'Server error' : err.message
@@ -88,6 +84,4 @@ app.use((err, req, res, next) => {
 // Use environment variable PORT if available, otherwise default to 5000
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📅 Started at: ${new Date().toISOString()}`);
 });

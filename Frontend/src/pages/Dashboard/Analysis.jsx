@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../utilities/axiosInstance.js';
 import { API_PATH } from '../../utilities/apiPath.js';
+import { parseDateOnlyLocal } from '../../utilities/dateUtils.js';
 import { FiActivity, FiCalendar, FiTrendingUp, FiCheckCircle } from 'react-icons/fi';
 import PerformanceGraph from '../../AnalysisGraph/PerformanceGraph.jsx';
 import CategoryPieChart from '../../AnalysisGraph/CategoryPieChart.jsx';
@@ -22,15 +23,12 @@ const Analysis = () => {
       
       if (dashboardRes.data.success) {
         setData(dashboardRes.data);
-        console.log("Dashboard data:", dashboardRes.data);
       }
       
       if (tasksRes.data.tasks) {
         setAllTasks(tasksRes.data.tasks);
-        console.log("All tasks:", tasksRes.data.tasks);
       }
     } catch (err) {
-      console.error("Analysis Fetch Error:", err);
     } finally {
       setLoading(false);
     }
@@ -48,7 +46,8 @@ const Analysis = () => {
     cutoff.setDate(cutoff.getDate() - nDays);
     return tasks.filter(task => {
       if (!task.date) return false;
-      const taskDate = new Date(task.date);
+      const taskDate = parseDateOnlyLocal(task.date);
+      if (!taskDate) return false;
       taskDate.setHours(0, 0, 0, 0);
       return taskDate >= cutoff;
     });

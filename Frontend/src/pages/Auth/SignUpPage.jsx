@@ -68,7 +68,6 @@ const SignUpPage = () => {
         toast.error(response.data.message)
       }
     } catch (err) {
-      console.error("SignUp error:", err)
       toast.error("An error occurred during signup. Please try again.")
     } finally {
       setLoading(false)

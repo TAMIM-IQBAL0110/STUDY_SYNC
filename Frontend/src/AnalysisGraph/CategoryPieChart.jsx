@@ -5,25 +5,20 @@ const CategoryPieChart = ({ title, tasks, colorScheme, extraHeader }) => {
   const categoryCounts = tasks?.reduce((acc, task) => {
     let categoryName = "Others";
     
-    // Debug: Log the category structure
-    if (task.category) {
-      console.log('Category structure:', task.category, 'Type:', typeof task.category);
-      
-      // If category is an object with name property
-      if (typeof task.category === 'object' && task.category !== null) {
-        if (task.category.name) {
-          categoryName = String(task.category.name).trim();  // Ensure string
-        } else if (task.category._id) {
-          categoryName = "Others";  // Fallback if no name
-        }
-      } 
-      // If category is already a string (old format)
-      else if (typeof task.category === 'string') {
-        if (task.category.length === 24) {
-          categoryName = "Others";  // Old ObjectId format
-        } else {
-          categoryName = String(task.category).trim();  // Use the string as-is
-        }
+    // If category is an object with name property
+    if (typeof task.category === 'object' && task.category !== null) {
+      if (task.category.name) {
+        categoryName = String(task.category.name).trim();  // Ensure string
+      } else if (task.category._id) {
+        categoryName = "Others";  // Fallback if no name
+      }
+    } 
+    // If category is already a string (old format)
+    else if (typeof task.category === 'string') {
+      if (task.category.length === 24) {
+        categoryName = "Others";  // Old ObjectId format
+      } else {
+        categoryName = String(task.category).trim();  // Use the string as-is
       }
     }
     
